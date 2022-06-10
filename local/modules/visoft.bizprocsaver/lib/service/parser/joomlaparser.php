@@ -4,7 +4,7 @@ namespace ViSoft\BizProcSaver\Service\Parser;
 
 use ViSoft\BizProcSaver\Service\Creater\Offer;
 
-class DBParser implements Offer\IGetOffer
+class JoomlaParser implements Offer\IGetOffer
 {
 
     public function __construct()

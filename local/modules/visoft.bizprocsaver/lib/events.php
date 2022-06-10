@@ -2,14 +2,15 @@
 
 namespace ViSoft\BizProcSaver;
 
-use ViSoft\BizProcSaver\Events\PrologEvent;
+
+use ViSoft\BizProcSaver\Events\CreateCardsForLoad;
 
 class Events extends \ViSoft\BizProcSaver\Tools\Events\Events
 {
     protected function getEvents()
     {
         return [
-//            new PrologEvent(),
+            new CreateCardsForLoad(),
         ];
     }
 }

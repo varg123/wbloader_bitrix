@@ -14,4 +14,4 @@ ini_set( 'xdebug.var_display_max_data', '1024' );
 
 require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 \Bitrix\Main\Loader::includeModule('visoft.bizprocsaver');
-//(new \ViSoft\BizProcSaver\Events())->register();
+(new \ViSoft\BizProcSaver\Events())->register();

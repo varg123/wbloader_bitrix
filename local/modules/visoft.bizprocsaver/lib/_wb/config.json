@@ -1,9 +1,0 @@
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImUxOTc3YzFmLTY3ODktNDE1Yi1iYmMzLTZkMzljODU0ZjE0ZiJ9.7z1ltNqzBeWVFbdB_sN4lYfG_9ECYlENoNnfkH1mB5Q",
-  "url": "C:\\Users\\Professional\\Desktop\\выгрузки\\marketwb.xml",
-  "warehouseId": 140727,
-  "dbname": "wb",
-  "dbhost": "192.168.0.4",
-  "dblogin": "root",
-  "dbpass": "123"
-}
