@@ -9,7 +9,7 @@ use Spatie\DataTransferObject\Attributes\CastWith;
 
 class Addin extends DataTransferObject
 {
-    #[CastWith(ParameterArrayCaster::class)]
+    /** @var Parameter[] */
     public $params;
     public $type;
 }

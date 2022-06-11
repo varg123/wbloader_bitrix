@@ -33,16 +33,16 @@ class Test extends \ViSoft\BizProcSaver\Service\Creater\Fabric\BaseProduct
             new CountryField("Китай"),
             new BrandField("Tarasoff"),
             new AddinField("Комплектация", 'упаковка, товар'),
-            new AddinField("Наименование", 'Test'),
-            new SupplierVendorCodeField('t'.$offer->id)
+            new AddinField("Наименование", $offer->model),
+            new SupplierVendorCodeField('testt'.$offer->id)
             //упаковка, товар
         ];
 
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImQ0NzFkNzE5LWVlZTgtNDQwZS05NmRkLTA3ZjY1ZTFjN2U0ZiJ9.bP84IcO5DRZQYzwpgCpTI-s38pc29pgjVhLeWHBRPMg';
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjllM2I4NWVkLTQwN2QtNDdmNC1hYWM0LThmYzU0ZWJjZDNiNiJ9.ap7rjYDyGfCbnz0UIaWmJQxdstIDPFNHaRS8zu3W44Q';
         $query = new \ViSoft\BizProcSaver\Service\WBApi\WBQuery($token);
         $fields[] = new NomenclatureField([
-            new VendorField('t'.$offer->id),
-            new PhotoField(['https://images.wbstatic.net/big/new/61280000/61285581-1.avif']),
+            new VendorField('test'.$offer->id),
+            new PhotoField($offer->pictures),
             new VariationField($query->getBarcodes()[0], '50'),
         ]);
 

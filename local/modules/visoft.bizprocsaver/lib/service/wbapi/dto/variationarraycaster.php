@@ -13,9 +13,9 @@ use Spatie\DataTransferObject\DataTransferObject;
 use Spatie\DataTransferObject\Attributes\CastWith;
 class VariationArrayCaster implements Caster
 {
-//    #[CastWith(ParameterArrayCaster::class)]
-//    public array $params;
-//    public $type;
+    #[CastWith(ParameterArrayCaster::class)]
+    public array $params;
+    public $type;
 
     public function cast(mixed $value): array
     {

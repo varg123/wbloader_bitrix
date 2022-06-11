@@ -10,13 +10,13 @@ use Spatie\DataTransferObject\DataTransferObject;
 
 class Nomenclature  extends DataTransferObject
 {
-    #[CastWith(\WBApi\DTO\AddinArrayCaster::class)]
+    #[CastWith(AddinArrayCaster::class)]
     public  $addin;
     public  $concatVendorCode;
     public  $id;
     public  $isArchive;
     public  $nmId;
-    #[CastWith(\WBApi\DTO\VariationArrayCaster::class)]
+    #[CastWith(VariationArrayCaster::class)]
     public  $variations;
     public  $vendorCode;
 }

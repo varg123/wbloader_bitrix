@@ -13,9 +13,9 @@ use Spatie\DataTransferObject\DataTransferObject;
 use Spatie\DataTransferObject\Attributes\CastWith;
 class NomenclatureArrayCaster implements Caster
 {
-//    #[CastWith(ParameterArrayCaster::class)]
-//    public  $params;
-//    public $type;
+    #[CastWith(ParameterArrayCaster::class)]
+    public  $params;
+    public $type;
 
     public function cast(mixed $value): array
     {

@@ -53,6 +53,10 @@ class CardFabric
 
     function updateCard($card, $offer)
     {
+
+        $product = null;
+        $product = new Test($offer);
+        return $product;
 //        $card->addin=[];
 //        if ($card->nomenclatures) {
 //            $card->nomenclatures[0]->addin =[];

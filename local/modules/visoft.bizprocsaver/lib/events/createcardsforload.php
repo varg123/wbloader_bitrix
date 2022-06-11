@@ -48,7 +48,7 @@ class CreateCardsForLoad implements IEvent
                 ],
                 'filter' => [
                     '=wbId' => $marketId,
-                    '=offer_id' => $p2,
+                    '=offer_id' => $p2['id'],
                 ]
             ])->fetch();
             if ($cardRow) {
@@ -56,17 +56,16 @@ class CreateCardsForLoad implements IEvent
                     'wbId' => $marketId,
                     'price' => $tmpOffer->price,
                     'outlet' => $tmpOffer->quantity,
-                    'offer_id' => $p2,
+                    'offer_id' => $p2['id'],
                     'data' => serialize($tmpOffer),
                 ]);
             }
             else {
-                pre($marketId);
                 CardsTable::add([
                     'wbId' => $marketId,
                     'price' => $tmpOffer->price,
                     'outlet' => $tmpOffer->quantity,
-                    'offer_id' => $p2,
+                    'offer_id' => $p2['id'],
                     'data' => serialize($tmpOffer),
                 ]);
             }

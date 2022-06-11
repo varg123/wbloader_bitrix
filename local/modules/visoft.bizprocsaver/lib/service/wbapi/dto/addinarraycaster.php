@@ -9,14 +9,14 @@ use Spatie\DataTransferObject\DataTransferObject;
 use Spatie\DataTransferObject\Attributes\CastWith;
 class AddinArrayCaster implements Caster
 {
-//    #[CastWith(\WBApi\DTO\ParameterArrayCaster::class)]
-//    public array $params;
-//    public $type;
+    #[CastWith(ParameterArrayCaster::class)]
+    public array $params;
+    public $type;
 
     public function cast(mixed $value): array
     {
         if (! is_array($value)) {
-            throw new Exception("Can only cast arrays to Foo");
+            throw new \Exception("Can only cast arrays to Foo");
         }
 
         return array_map(

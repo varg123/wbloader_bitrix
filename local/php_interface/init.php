@@ -10,7 +10,7 @@ function pre($arr){
 }
 ini_set( 'xdebug.var_display_max_depth', '10' );
 ini_set( 'xdebug.var_display_max_children', '256' );
-ini_set( 'xdebug.var_display_max_data', '1024' );
+ini_set( 'xdebug.var_display_max_data', '2024' );
 
 require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 \Bitrix\Main\Loader::includeModule('visoft.bizprocsaver');
