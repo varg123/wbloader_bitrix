@@ -43,9 +43,9 @@ class CardsTable extends DataManager
             'nmId' => [
                 'data_type' => 'integer',
             ],
-//            'vendorCode' => [
-//                'data_type' => 'string',
-//            ],
+            'vendorCode' => [
+                'data_type' => 'string',
+            ],
             'price' => [
                 'data_type' => 'float',
             ],
@@ -77,15 +77,15 @@ class CardsTable extends DataManager
                 'id',
                 'nmId',
                 'barcode',
-//                'vendorCode'
+                'vendorCode'
             ],
             'filter' => [
                 '=wbId' => $wbId,
                 '=offer_id' => $offerId
             ]
         ])->fetch();
-        if ($row) return [$row['barcode'],$row['nmId']];
-        return ['', ''];
+        if ($row) return [$row['barcode'],$row['vendorCode'],$row['nmId']];
+        return ['', '', ''];
     }
 
     static function setError($wbId, $offerId, $error)
@@ -124,8 +124,8 @@ class CardsTable extends DataManager
         if ($row) {
             self::update($row['id'], [
                 'nmId' => $nmId,
-                'barcode' => $barcode,
-//                'vendorCode' => $vendorCode,
+                'barcode' => $barcode?$barcode:'',
+                'vendorCode' => $vendorCode,
                 'error' => '',
             ]);
         }

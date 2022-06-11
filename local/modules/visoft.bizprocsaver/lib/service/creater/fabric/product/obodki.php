@@ -3,6 +3,7 @@
 namespace ViSoft\BizProcSaver\Service\Creater\Fabric\Product;
 
 
+use ViSoft\BizProcSaver\Service\Creater\Fabric\BaseProduct;
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Base\AddinField;
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Base\BrandField;
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Base\CountryField;
@@ -14,7 +15,7 @@ use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Nomenclature\Varia
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Nomenclature\VendorField;
 use ViSoft\BizProcSaver\Service\Creater\Offer\Offer;
 
-class Test extends \ViSoft\BizProcSaver\Service\Creater\Fabric\BaseProduct
+class Obodki extends BaseProduct
 {
     protected $offer = null;
 
@@ -29,24 +30,19 @@ class Test extends \ViSoft\BizProcSaver\Service\Creater\Fabric\BaseProduct
          */
         $offer = $this->offer;
         $fields = [
-            new ObjectField("БАДы"),
+            new ObjectField("Ободки"),
             new CountryField("Китай"),
             new BrandField("Tarasoff"),
             new AddinField("Комплектация", 'упаковка, товар'),
             new AddinField("Наименование", $offer->model),
-            new SupplierVendorCodeField('testt'.$offer->id)
-            //упаковка, товар
+            new SupplierVendorCodeField('ttttt'.$offer->id)
         ];
 
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjllM2I4NWVkLTQwN2QtNDdmNC1hYWM0LThmYzU0ZWJjZDNiNiJ9.ap7rjYDyGfCbnz0UIaWmJQxdstIDPFNHaRS8zu3W44Q';
-        $query = new \ViSoft\BizProcSaver\Service\WBApi\WBQuery($token);
         $fields[] = new NomenclatureField([
-            new VendorField('test'.$offer->id),
-            new PhotoField($offer->pictures),
-            new VariationField($query->getBarcodes()[0], '50'),
+            new VendorField('tttttt'.$offer->id),
+            new PhotoField(['https://avatars.mds.yandex.net/get-zen_doc/1852570/pub_6117bfcf77c7ad7281be77ff_6117bfd35be0d94cdffb8815/scale_1200']),
+            new VariationField($offer->barcode, (int)$offer->price),
         ]);
-
-
         return $fields;
     }
 }

@@ -59,7 +59,7 @@ abstract class Market// implements IMarket
         $wbRequest = new WBQuery($this->getToken());
         foreach ($marketParser->getOffer() as $offer) {
             $offerObject = clone $offer;
-            [$barcode, $vendorCode] = CardsTable::getIds(static::getId(), $offer->id);
+            [$barcode, $vendorCode, $nmId] = CardsTable::getIds(static::getId(), $offer->id);
             /**
              * @var $card Card
              * @var $offerObject Offer
@@ -73,30 +73,28 @@ abstract class Market// implements IMarket
                     $card = $this->findCardByVendorCode($wbRequest, $vendorCode);
                 }
                 if (!$barcode and !$vendorCode and is_null($card)) {
-                    if(is_null($offerObject->barcode)) {
+                    if (is_null($offerObject->barcode)) {
                         $offerObject->barcode = current($wbRequest->getBarcodes(1));
                     }
                     //todo: добавить эксепшены в методе
                     $card = $cardCreator->createCard($offerObject);
+
                     $wbRequest->cardCreate($card);
                 } elseif ($card) {
-                    $card = $cardCreator->updateCard($card, $offerObject);
-                    $wbRequest->cardUpdate($card);
+//                    $card = $cardCreator->updateCard($card, $offerObject);
+//                    $wbRequest->cardUpdate($card);
                 } else {
                     throw new Exception("Карточка пропала после обновления");
                 }
 
-                $vendorCode = current($card->nomenclatures)->vendorCode;
-                $barcode = current(current($card->nomenclatures)->variations)->barcodes[0];
-                $card = null;
-                if ($barcode) {
-                    $card = $this->findCardByBarcode($wbRequest, $barcode);
-                }
-                if (is_null($card) and $vendorCode) {
-                    $card = $this->findCardByVendorCode($wbRequest, $vendorCode);
-                }
                 if ($card) {
+                    $vendorCode = current($card->nomenclatures)->vendorCode;
+
+                    $barcode = current(current($card->nomenclatures)->variations)->barcode;
+                    $barcode = $barcode ? $barcode : current(current($card->nomenclatures)->variations)->barcodes[0];
+
                     $nmId = current($card->nomenclatures)->nmId;
+                    $nmId = $nmId ? $nmId : 0;
                     /**
                      * @var $offer Offer
                      */

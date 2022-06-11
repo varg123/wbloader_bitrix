@@ -27,7 +27,7 @@ class JoomlaParser implements Offer\IGetOffer
                 'offset' => $offset
             ])->fetchAll();
             if (empty($products)) break;
-            $offset+=$limit;
+            $offset += $limit;
             foreach ($products as $product) {
                 $offer = [];
                 $offer['id'] = (int)$product['product_id'];
@@ -88,7 +88,9 @@ class JoomlaParser implements Offer\IGetOffer
      */
     protected function filterOffers($offerObj)
     {
-        return true;
+        if ($offerObj->category == 'Ободки')
+            return true;
+        return false;
     }
 
     protected function convertOffer(Offer\Offer $offerObj)
