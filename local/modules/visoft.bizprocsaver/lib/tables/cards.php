@@ -43,6 +43,9 @@ class CardsTable extends DataManager
             'nmId' => [
                 'data_type' => 'integer',
             ],
+//            'vendorCode' => [
+//                'data_type' => 'string',
+//            ],
             'price' => [
                 'data_type' => 'float',
             ],
@@ -67,4 +70,64 @@ class CardsTable extends DataManager
         ];
     }
 
+    static function getIds($wbId, $offerId)
+    {
+        $row = self::getList([
+            'select' => [
+                'id',
+                'nmId',
+                'barcode',
+//                'vendorCode'
+            ],
+            'filter' => [
+                '=wbId' => $wbId,
+                '=offer_id' => $offerId
+            ]
+        ])->fetch();
+        if ($row) return [$row['barcode'],$row['nmId']];
+        return ['', ''];
+    }
+
+    static function setError($wbId, $offerId, $error)
+    {
+        $row = self::getList([
+            'select' => [
+                'id',
+                'wbId',
+                'offer_id'
+            ],
+            'filter' => [
+                '=wbId' => $wbId,
+                '=offer_id' => $offerId
+            ]
+        ])->fetch();
+        if ($row) {
+            self::update($row['id'], [
+                'error' => $error
+            ]);
+        }
+    }
+
+    static function setIds($wbId, $offerId, $nmId, $barcode, $vendorCode)
+    {
+        $row = self::getList([
+            'select' => [
+                'id',
+                'wbId',
+                'offer_id'
+            ],
+            'filter' => [
+                '=wbId' => $wbId,
+                '=offer_id' => $offerId
+            ]
+        ])->fetch();
+        if ($row) {
+            self::update($row['id'], [
+                'nmId' => $nmId,
+                'barcode' => $barcode,
+//                'vendorCode' => $vendorCode,
+                'error' => '',
+            ]);
+        }
+    }
 }

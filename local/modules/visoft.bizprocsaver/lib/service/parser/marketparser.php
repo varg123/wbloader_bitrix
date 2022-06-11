@@ -35,7 +35,7 @@ class MarketParser implements Offer\IGetOffer
                 $offerObj = unserialize($product['data']);
                 $offerObj = $this->convertOffer($offerObj);
                 if ($this->filterOffers($offerObj)) {
-                    yield [$offerObj, $product['barcode'], $product['nmId']];
+                    yield $offerObj;
                 }
             }
         }
