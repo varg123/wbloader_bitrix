@@ -32,4 +32,9 @@ class Market1 extends Market
     {
         return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjllM2I4NWVkLTQwN2QtNDdmNC1hYWM0LThmYzU0ZWJjZDNiNiJ9.ap7rjYDyGfCbnz0UIaWmJQxdstIDPFNHaRS8zu3W44Q';
     }
+
+    function getWarehouseId(): int
+    {
+        return 110;
+    }
 }

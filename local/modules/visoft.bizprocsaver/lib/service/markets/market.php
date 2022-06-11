@@ -21,6 +21,9 @@ abstract class Market// implements IMarket
 
     abstract function changeOffer($offer): Offer;
 
+    abstract function getToken(): string;
+
+    abstract function getWarehouseId(): int;
 
     /**
      * @param $query WBQuery
@@ -39,7 +42,7 @@ abstract class Market// implements IMarket
      * @param $query WBQuery
      * @throws \Exception
      */
-    function findCardByVendorCode($query, $vendorCode): array
+    function findCardByVendorCode($query, $vendorCode)
     {
         $find = new Find([
             'column' => "nomenclatures.vendorCode",
@@ -69,7 +72,7 @@ abstract class Market// implements IMarket
                 if (is_null($card) and $vendorCode) {
                     $card = $this->findCardByVendorCode($wbRequest, $vendorCode);
                 }
-                if ((!$barcode or !$vendorCode) and $card) {
+                if (!$barcode and !$vendorCode and is_null($card)) {
                     if(is_null($offerObject->barcode)) {
                         $offerObject->barcode = current($wbRequest->getBarcodes(1));
                     }
@@ -182,7 +185,4 @@ abstract class Market// implements IMarket
         }
     }
 
-    abstract function getToken(): string;
-
-    abstract function getWarehouseId(): int;
 }
