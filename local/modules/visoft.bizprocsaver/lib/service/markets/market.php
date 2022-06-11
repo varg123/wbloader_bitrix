@@ -10,6 +10,7 @@ use ViSoft\BizProcSaver\Service\Creater\Offer\Offer;
 use ViSoft\BizProcSaver\Service\Parser\MarketParser;
 use ViSoft\BizProcSaver\Service\WBApi\Dto\Card;
 use ViSoft\BizProcSaver\Service\WBApi\Dto\Find;
+use ViSoft\BizProcSaver\Service\WBApi\Dto\Price;
 use ViSoft\BizProcSaver\Service\WBApi\WBQuery;
 use ViSoft\BizProcSaver\Tables\CardsTable;
 
@@ -58,6 +59,7 @@ abstract class Market// implements IMarket
             [$barcode, $vendorCode] = CardsTable::getIds(static::getId(), $offer->id);
             /**
              * @var $card Card
+             * @var $offerObject Offer
              */
             $card = null;
             try {
@@ -67,8 +69,10 @@ abstract class Market// implements IMarket
                 if (is_null($card) and $vendorCode) {
                     $card = $this->findCardByVendorCode($wbRequest, $vendorCode);
                 }
-
                 if ((!$barcode or !$vendorCode) and $card) {
+                    if(is_null($offerObject->barcode)) {
+                        $offerObject->barcode = current($wbRequest->getBarcodes(1));
+                    }
                     //todo: добавить эксепшены в методе
                     $card = $cardCreator->createCard($offerObject);
                     $wbRequest->cardCreate($card);
@@ -107,13 +111,78 @@ abstract class Market// implements IMarket
     }
 
 
-    function getConfig(): array
+    function loadPrices()
     {
-        return [
-            'key' => '123',
-            'strockId' => 123123,
-        ];
+        $res = CardsTable::getList([
+            'select' =>
+                [
+                    'price',
+                    'nmId',
+                ],
+            'filter' => [
+                '!nmId' => false,
+                '=wbId' => static::getId(),
+            ],
+        ]);
+        $prices = [];
+        while ($priceData = $res->fetch()) {
+            $prices[] = new Price([
+                'price' => (int)$priceData['price'],
+                'nmId' => (string)$priceData['nmId'],
+            ]);
+        }
+        $wbRequest = new WBQuery($this->getToken());
+        try {
+            $wbRequest->prices([$prices]);
+        } catch (\Exception $e) {
+            \CEventLog::Add([
+                "SEVERITY" => "SECURITY",
+                "AUDIT_TYPE_ID" => "MY_OWN_TYPE",
+                "MODULE_ID" => "main",
+                "ITEM_ID" => static::getId(),
+                "DESCRIPTION" => $e->getMessage(),
+            ]);
+        }
+    }
+
+    function loadOutlets()
+    {
+        $res = CardsTable::getList([
+            'select' =>
+                [
+                    'outlet',
+                    'barcode',
+                ],
+            'filter' => [
+                '!nmId' => false,
+                '=wbId' => static::getId(),
+            ],
+        ]);
+        $stocks = [];
+        while ($priceData = $res->fetch()) {
+            $stocks[] = [
+                'outlet' => (int)$priceData['outlet'],
+                'barcode' => (string)$priceData['barcode'],
+                'warehouseId' => static::getWarehouseId(),
+            ];
+        }
+        $wbRequest = new WBQuery($this->getToken());
+        foreach (array_chunk($stocks, 1000) as $stocksGroup) {
+            try {
+                $wbRequest->stocks(static::getWarehouseId(), $stocksGroup);
+            } catch (\Exception $e) {
+                \CEventLog::Add([
+                    "SEVERITY" => "SECURITY",
+                    "AUDIT_TYPE_ID" => "OUTLET_ERROR",
+                    "MODULE_ID" => "main",
+                    "ITEM_ID" => static::getId(),
+                    "DESCRIPTION" => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     abstract function getToken(): string;
+
+    abstract function getWarehouseId(): int;
 }

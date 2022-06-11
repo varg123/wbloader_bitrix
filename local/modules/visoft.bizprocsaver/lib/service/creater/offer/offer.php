@@ -2,6 +2,7 @@
 
 
 namespace ViSoft\BizProcSaver\Service\Creater\Offer;
+
 use Spatie\DataTransferObject\DataTransferObject;
 
 class Offer extends DataTransferObject
@@ -15,6 +16,7 @@ class Offer extends DataTransferObject
     public $model;
     public $vendorCode;
     public $pictures;
+    public $barcode = null;
 
 
     //params

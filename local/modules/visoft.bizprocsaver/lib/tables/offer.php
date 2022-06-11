@@ -86,6 +86,7 @@ class OfferTable extends DataManager
         $offer = clone $offer;
         $offer->price = 0;
         $offer->quantity = 0;
+        $offer->barcode = null;
         return crc32(serialize($offer));
     }
 }
