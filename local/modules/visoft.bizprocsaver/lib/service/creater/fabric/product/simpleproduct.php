@@ -15,14 +15,18 @@ use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Nomenclature\Varia
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Fields\Nomenclature\VendorField;
 use ViSoft\BizProcSaver\Service\Creater\Offer\Offer;
 
-class Obodki extends BaseProduct
+class SimpleProduct extends BaseProduct
 {
     protected $offer = null;
 
-    public function __construct($offer)
+    protected $categoryName = null;
+
+    public function __construct($offer, $categoryName)
     {
         $this->offer = $offer;
+        $this->categoryName = $categoryName;
     }
+
     public function getFields()
     {
         /**
@@ -30,16 +34,16 @@ class Obodki extends BaseProduct
          */
         $offer = $this->offer;
         $fields = [
-            new ObjectField("Ободки"),
+            new ObjectField($this->categoryName),
             new CountryField("Китай"),
             new BrandField("Tarasoff"),
             new AddinField("Комплектация", 'упаковка, товар'),
             new AddinField("Наименование", $offer->model),
-            new SupplierVendorCodeField('ttttt'.$offer->id)
+            new SupplierVendorCodeField('ttttt' . $offer->id)
         ];
 
         $fields[] = new NomenclatureField([
-            new VendorField('tttttt'.$offer->id),
+            new VendorField('tttttt' . $offer->id),
             new PhotoField(['https://avatars.mds.yandex.net/get-zen_doc/1852570/pub_6117bfcf77c7ad7281be77ff_6117bfd35be0d94cdffb8815/scale_1200']),
             new VariationField($offer->barcode, (int)$offer->price),
         ]);
