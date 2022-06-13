@@ -19,11 +19,11 @@ class Markets
     {
         $parser = new JoomlaParser();
         $i=0;
-        $cnt=10;
+        $cnt=0;
         foreach ($parser->getOffer() as $offer) {
+            OfferTable::saveOffer($offer);
             $i++;
             if($i>$cnt) break;
-            OfferTable::saveOffer($offer);
         }
     }
 }

@@ -10,13 +10,17 @@ class Offer extends DataTransferObject
     public $id;
     public $price;
     public $category;
+    public $parentCategory = null;
     public $weight;
     public $quantity;
     public $vendor;
     public $model;
-    public $vendorCode;
     public $pictures;
+    public $description;
     public $barcode = null;
+
+    public $vendorCode = null;
+    public $vendorCodeSupplier = null;
 
 
     //params

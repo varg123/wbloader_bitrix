@@ -2,10 +2,11 @@
 
 namespace ViSoft\BizProcSaver\Service\Creater\Fabric;
 
+use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Bishuteria;
+use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\BishuteriaWithSize;
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Brasleti;
-use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\Broshi;
+use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\ProductWithSex;
 use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\SimpleProduct;
-use ViSoft\BizProcSaver\Service\Creater\Fabric\Product\SimpleProductWithSex;
 
 class CardFabric
 {
@@ -16,97 +17,149 @@ class CardFabric
          * @var $product BaseProduct
          */
         switch ($offer->category) {
-            case 'Ободки':
-                $product = new SimpleProduct($offer, 'Ободки');
-                break;
-            case 'Невидимки, зажимы и шпильки':
-                $product = new SimpleProduct($offer, 'Невидимки');
-                break;
-            case 'Резинки':
-                $product = new SimpleProductWithSex($offer, 'Резинки');
-                break;
-            case 'Крабы, бананы, заколки':
-                $product = new SimpleProductWithSex($offer, 'Заколки клик-клак');
-                break;
-            case 'Аксессуары для создания прически':
-            case 'Наборы аксессуаров для волос':
-                $product = new SimpleProduct($offer, 'Наборы аксессуаров для волос');
-                break;
-//                todo: проверить по размерам Повязки
-//            case 'Повязки':
-            case 'Диадемы':
-                $product = new SimpleProduct($offer, 'Диадемы');
-                break;
-            case 'Банты':
-                $product = new SimpleProductWithSex($offer, 'Банты');
-                break;
-            case 'Гребни':
-                $product = new SimpleProductWithSex($offer, 'Гребни');
-                break;
-
-
-//                todo: проверить по размерам Браслеты
-            case 'Браслеты ассорти':
-            case 'Деревянные браслеты':
-            case 'Браслеты из бисера':
-            case 'Кожаные браслеты':
-            case 'Металлические браслеты':
-            case 'Браслеты на ногу':
-            case 'Браслеты на предплечье':
-            case 'Новогодние браслеты':
-            case 'Пластиковые браслеты':
-            case 'Браслеты под натуральный камень':
-            case 'Браслеты с жемчугом':
-            case 'Браслеты с эмалью':
-            case 'Браслеты со стразами':
-            case 'Браслеты-кольца':
-            case 'Браслеты-обереги':
-            case 'Браслеты-пружинка':
-            case 'Посеребренные и позолоченные браслеты':
-                $product = new Brasleti($offer);
-                break;
-
-
-            case 'Броши':
-            case 'Ассорти':
-            case 'Металлические броши':
-            case 'Броши под натуральный камень':
-            case 'Посеребренные и позолоченные броши':
-            case 'Броши с жемчугом':
-            case 'Броши с эмалью':
-            case 'Броши со стразами':
-            case 'Текстильные броши':
-            case 'Деревянные броши':
-            case 'Акриловые броши':
-            case 'Кожаные броши':
-            case 'Аксессуары для платков':
-            case 'Новогодние броши':
-            case 'Зажимы для кардиганов':
-                $product = new Broshi($offer);
-                break;
-
-//            case 'Значки':
-            case 'Булавки':
-                $product = new SimpleProduct($offer, 'Булавки');
-                break;
-            case 'Обереги':
-                $product = new SimpleProduct($offer, 'Обереги');
-                break;
-            case 'Муфты':
-                $product = new SimpleProductWithSex($offer, 'Муфты');
-                break;
-//            case 'Кольца':
+            case 'Ободки' :
+            case 'Невидимки, зажимы и шпильки' :
+            case 'Наборы аксессуаров для волос' :
+            case 'Аксессуары для создания прически' :
+            case 'Банты' :
+            case 'Гребни' :
+            case 'Булавки' :
+            case 'Обереги' :
             case 'Зажимы':
-                $product = new SimpleProduct($offer, 'Зажимы');
+            case 'Магниты' :
+            case 'Наборы, гарнитуры' :
+            case 'Колье' :
+            case 'Каффы' :
+            case 'Детские наборы украшений' :
+            case 'Запонки и зажимы' :
+            case 'Кольца, перстни':
+            case 'Наборы' :
+            case 'Гарнитуры' :
+            case 'Амулеты' :
+            case 'Сучкорезы' :
+            case 'Садовые ножи' :
+            case 'Садовые ножовки' :
+            case 'Столярный инструмент' :
+            case 'Косы, серпы':
+            case 'Ножницы, секаторы' :
+            case 'Топоры, колуны':
+            case 'Кусторезы' :
+            case 'Тележки' :
+            case 'Тачки':
+            case 'Комплектующие для тачек' :
+            case 'Ковши, черпаки':
+            case 'Садовые щётки':
+            case 'Канистры' :
+            case 'Баки' :
+            case 'Бочки' :
+            case 'Фляги' :
+            case 'Бидоны' :
+            case 'Вёдра' :
+            case 'Тазы':
+            case 'Мётлы' :
+            case 'Вилы':
+            case 'Грабли':
+            case 'Лопаты' :
+            case 'Мотыги' :
+            case 'Рыхлители' :
+            case 'Плоскорезы' :
+            case 'Черенки' :
+            case 'Сеялки':
+            case 'Посадочные вилки':
+            case 'Корнеудалители':
+            case 'Мотыжки' :
+            case 'Наборы садовых инструментов':
+            case 'Совки' :
+            case 'Малые грабли' :
+            case 'Малые рыхлители' :
+                $product = new SimpleProduct($offer);
                 break;
-            case 'Магниты':
-                $product = new SimpleProduct($offer, 'Магниты');
+            case 'Резинки' :
+            case 'Крабы, бананы, заколки' :
+            case 'Повязки':
+            case 'Диадемы' :
+            case 'Муфты' :
+            case 'Пряжки' :
+                $product = new ProductWithSex($offer);
                 break;
-            case 'Пряжки':
-                $product = new SimpleProductWithSex($offer, 'Пряжки');
+            case 'Браслеты' :
+            case 'Браслеты ассорти' :
+            case 'Деревянные браслеты' :
+            case 'Браслеты из бисера' :
+            case 'Кожаные браслеты':
+            case 'Металлические браслеты' :
+            case 'Браслеты на ногу' :
+            case 'Браслеты на предплечье':
+            case 'Новогодние браслеты' :
+            case 'Пластиковые браслеты' :
+            case 'Браслеты под натуральный камень' :
+            case 'Браслеты с жемчугом' :
+            case 'Браслеты с эмалью':
+            case 'Браслеты со стразами' :
+            case 'Браслеты-кольца':
+            case 'Браслеты-обереги' :
+            case 'Браслеты-пружинка' :
+            case 'Посеребренные и позолоченные браслеты' :
+            case 'Ассорти' :
+            case 'Металлические броши' :
+            case 'Броши под натуральный камень' :
+            case 'Посеребренные и позолоченные броши' :
+            case 'Броши с жемчугом' :
+            case 'Броши с эмалью':
+            case 'Броши со стразами' :
+            case 'Броши' :
+            case 'Текстильные броши' :
+            case 'Деревянные броши' :
+            case 'Акриловые броши' :
+            case 'Кожаные броши':
+            case 'Значки' :
+            case 'Аксессуары для платков' :
+            case 'Кольца' :
+            case 'Новогодние броши' :
+            case 'Зажимы для кардиганов' :
+            case 'Кулоны':
+            case 'Подвески' :
+            case 'Серьги' :
+            case 'Новогодние серьги':
+            case 'Серьги в наборах':
+            case 'Серьги ассорти':
+            case 'Серьги висячие со стразами':
+            case 'Деревянные серьги':
+            case 'Серьги диорис' :
+            case 'Серьги из камня':
+            case 'Серьги из ракушки' :
+            case 'Металлические серьги' :
+            case 'Серьги перья':
+            case 'Посеребренные и позолоченные серьги':
+            case 'Серьги с жемчугом' :
+            case 'Серьги с эмалью':
+            case 'Серьги со стразами' :
+            case 'Серьги-кисти' :
+            case 'Серьги-кольца' :
+            case 'Серьги-обереги' :
+            case 'Пластиковые и акриловые серьги' :
+            case 'Пластиковые серьги' :
+            case 'Акриловые серьги' :
+            case 'Детские браслеты' :
+            case 'Чётки':
+            case 'Клипсы' :
+            case 'Детские клипсы' :
+            case 'Детские кольца' :
+            case 'Детские кулоны' :
+            case 'Детские серьги' :
+            case 'Детские комплекты' :
+            case 'Детские броши' :
+            case 'Цепи':
+            case 'Декоративные цепи' :
+            case 'Классические цепи':
+            case 'Чокеры' :
+                $product = new Bishuteria($offer);
                 break;
-
-
+            case 'Бусы' :
+            case 'Бусины на нити' :
+            case 'Детские бусы' :
+                $product = new BishuteriaWithSize($offer);
+                break;
             default:
                 throw new \Exception("Не описанная категория");
         }

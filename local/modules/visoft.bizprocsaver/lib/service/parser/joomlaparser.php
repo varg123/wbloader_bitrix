@@ -3,6 +3,7 @@
 namespace ViSoft\BizProcSaver\Service\Parser;
 
 use ViSoft\BizProcSaver\Service\Creater\Offer;
+use ViSoft\BizProcSaver\Service\Joomla\CategoriesTable;
 
 class JoomlaParser implements Offer\IGetOffer
 {
@@ -20,6 +21,7 @@ class JoomlaParser implements Offer\IGetOffer
                 'select' => [
                     '*',
                     'category_id' => 'CATEGORIES.category_id',
+                    'category_parent_id' => 'CATEGORIES.category_parent_id',
                     'CATEGORIES.*',
                     'category_name' => 'CATEGORIES.name_ru-RU',
                 ],
@@ -56,7 +58,7 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetchAll();
 
                 $picturesNames = array_column($res, 'image_name');
-                $tmpUrl = 'http://marketserver.site/components/com_jshopping/files/img_products/full_';
+                $tmpUrl = 'http://marketserver.site/components/com_jshopping/files/img_products/';
                 foreach ($picturesNames as $picName) {
                     $offer['pictures'][] = $tmpUrl . $picName;
                 }
@@ -71,6 +73,19 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetch()['name_ru-RU'];
                 $offer['material'] = $material;
                 $offer['quantity'] = (int)$product['product_quantity'];
+                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']),0,1000);
+
+                if($product['category_parent_id']) {
+                    $offer['parentCategory'] = CategoriesTable::getList([
+                        'select'=> [
+                            '*'
+                        ],
+                        'filter'=>[
+                            '=category_id' => $product['category_parent_id'],
+                        ]
+                    ])->fetch()['name_ru-RU'];
+                }
+                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']),0,1000);
 
                 $offerObj = new Offer\Offer($offer);
                 $offerObj = $this->convertOffer($offerObj);
@@ -88,7 +103,7 @@ class JoomlaParser implements Offer\IGetOffer
      */
     protected function filterOffers($offerObj)
     {
-        if ($offerObj->category == 'Ободки')
+        if ($offerObj->id == 97)
             return true;
         return false;
     }

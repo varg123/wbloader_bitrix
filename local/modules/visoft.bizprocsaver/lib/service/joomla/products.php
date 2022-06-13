@@ -67,6 +67,9 @@ class ProductsTable extends DataManager
             'name_ru-RU' => [
                 'data_type' => 'string',
             ],
+            'description_ru-RU' => [
+                'data_type' => 'string',
+            ],
             'alias_ru-RU' => [
                 'data_type' => 'string',
             ],
