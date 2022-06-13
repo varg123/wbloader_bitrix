@@ -73,19 +73,22 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetch()['name_ru-RU'];
                 $offer['material'] = $material;
                 $offer['quantity'] = (int)$product['product_quantity'];
-                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']),0,1000);
+                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']), 0, 1000);
 
-                if($product['category_parent_id']) {
+                if ($product['category_parent_id']) {
                     $offer['parentCategory'] = CategoriesTable::getList([
-                        'select'=> [
+                        'select' => [
                             '*'
                         ],
-                        'filter'=>[
+                        'filter' => [
                             '=category_id' => $product['category_parent_id'],
                         ]
                     ])->fetch()['name_ru-RU'];
                 }
-                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']),0,1000);
+
+                $desc = strip_tags((string)$product['description_ru-RU']);
+                $desc = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/', '', $desc);
+                $offer['description'] = mb_substr($desc, 0, 1000);
 
                 $offerObj = new Offer\Offer($offer);
                 $offerObj = $this->convertOffer($offerObj);
@@ -103,9 +106,9 @@ class JoomlaParser implements Offer\IGetOffer
      */
     protected function filterOffers($offerObj)
     {
-        if ($offerObj->id == 97)
-            return true;
-        return false;
+//        if ($offerObj->id == 97)
+//            return true;
+        return true;
     }
 
     protected function convertOffer(Offer\Offer $offerObj)
