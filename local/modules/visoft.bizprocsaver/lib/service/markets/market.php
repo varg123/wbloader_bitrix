@@ -81,8 +81,8 @@ abstract class Market// implements IMarket
 
                     $wbRequest->cardCreate($card);
                 } elseif ($card) {
-//                    $card = $cardCreator->updateCard($card, $offerObject);
-//                    $wbRequest->cardUpdate($card);
+                    $card = $cardCreator->updateCard($card, $offerObject);
+                    $wbRequest->cardUpdate($card);
                 } else {
                     throw new Exception("Карточка пропала после обновления");
                 }

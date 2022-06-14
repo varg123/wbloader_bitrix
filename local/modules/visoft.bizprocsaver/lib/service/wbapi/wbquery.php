@@ -219,7 +219,7 @@ class WBQuery
             ]
         ];
         $param = json_encode($param, JSON_UNESCAPED_UNICODE);
-        pre($param);
+//        pre($param);
         if ($param) {
             $res = $this->curl->post('https://suppliers-api.wildberries.ru/card/create', $param);
             $responce = json_decode(json_encode($this->curl->response), true);

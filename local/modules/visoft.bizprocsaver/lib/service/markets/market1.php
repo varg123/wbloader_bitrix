@@ -47,21 +47,15 @@ class Market1 extends Market
         return 'wb1';
     }
 
-    function getConfig(): array
-    {
-        return [
-            'key' => '123',
-            'strockId' => 123123,
-        ];
-    }
-
     function getToken(): string
     {
+//        \COption::GetOptionString('visoft.pizprocsaver', 'key.'.self::getId());
         return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjIzNTMyOTIzLTY0MjgtNDI3Ny1hODY2LWY3ZTk0NzJjYTMyNiJ9.myxXRKj4Tavq75fe7VqgWqH0pNc3iH3vC3TNPgmBrpc';
     }
 
     function getWarehouseId(): int
     {
+//        \COption::GetOptionString('visoft.pizprocsaver', 'warehouse.'.self::getId());
         return 110;
     }
 }
