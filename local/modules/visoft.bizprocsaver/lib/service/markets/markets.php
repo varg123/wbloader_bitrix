@@ -19,12 +19,8 @@ class Markets
     public static function loadOffers()
     {
         $parser = new JoomlaParser();
-        $i = 0;
-        $cnt = 100;
         foreach ($parser->getOffer() as $offer) {
             OfferTable::saveOffer($offer);
-            $i++;
-            if ($i > $cnt) break;
         }
     }
 
