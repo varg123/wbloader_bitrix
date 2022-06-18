@@ -22,7 +22,7 @@ class JoomlaParser implements Offer\IGetOffer
                 'CATEGORIES.*',
                 'category_name' => 'CATEGORIES.name_ru-RU',
             ],
-            'limit' => 100
+//            'limit' => 100
         ]);
 
 
