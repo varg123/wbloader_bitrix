@@ -15,3 +15,4 @@ ini_set( 'xdebug.var_display_max_data', '2024' );
 require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 \Bitrix\Main\Loader::includeModule('visoft.bizprocsaver');
 (new \ViSoft\BizProcSaver\Events())->register();
+\Bitrix\Main\Application::getConnection('joomla')->query("SET NAMES 'utf8'");

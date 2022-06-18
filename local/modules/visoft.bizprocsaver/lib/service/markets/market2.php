@@ -48,11 +48,11 @@ class Market2 extends Market
 
     function getToken(): string
     {
-        return \COption::GetOptionString('visoft.pizprocsaver', 'key.'.self::getId());
+        return \COption::GetOptionString('visoft.pizprocsaver', 'key.'.static::getId());
     }
 
     function getWarehouseId(): int
     {
-        return \COption::GetOptionString('visoft.pizprocsaver', 'warehouse.'.self::getId());
+        return \COption::GetOptionString('visoft.pizprocsaver', 'warehouse.'.static::getId());
     }
 }
