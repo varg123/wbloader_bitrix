@@ -19,7 +19,7 @@ class JoomlaParser implements Offer\IGetOffer
         $offset = 0;
         $count = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
             'select' => [
-                '*',
+                'product_id',
             ],
         ])->getSelectedRowsCount();
         while (true) {
