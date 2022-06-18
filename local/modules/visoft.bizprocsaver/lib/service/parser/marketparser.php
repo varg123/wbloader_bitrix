@@ -9,6 +9,7 @@ class MarketParser implements Offer\IGetOffer
 {
 
     private $wbId = null;
+
     public function __construct($wbId)
     {
         $this->wbId = $wbId;
@@ -16,27 +17,21 @@ class MarketParser implements Offer\IGetOffer
 
     public function getOffer(): \Generator
     {
-        $limit = 40;
-        $offset = 0;
-        while (true) {
-            $products = CardsTable::getList([
-                'select' => [
-                    '*',
-                ],
-                'filter' => [
-                    '=wbId' => $this->wbId
-                ],
-                'limit' => $limit,
-                'offset' => $offset
-            ])->fetchAll();
-            if (empty($products)) break;
-            $offset+=$limit;
-            foreach ($products as $product) {
-                $offerObj = unserialize($product['data']);
-                $offerObj = $this->convertOffer($offerObj);
-                if ($this->filterOffers($offerObj)) {
-                    yield $offerObj;
-                }
+        $req = CardsTable::getList([
+            'select' => [
+                '*',
+                'OFFER.is_update'
+            ],
+            'filter' => [
+                '=wbId' => $this->wbId,
+                '=OFFER.is_update' => 'Y'
+            ],
+        ]);
+        while ($product = $req->fetch()) {
+            $offerObj = unserialize($product['data']);
+            $offerObj = $this->convertOffer($offerObj);
+            if ($this->filterOffers($offerObj)) {
+                yield $offerObj;
             }
         }
     }
@@ -46,7 +41,7 @@ class MarketParser implements Offer\IGetOffer
      * @param $offerObj Offer\Offer
      * @return bool
      */
-    protected function filterOffers($offerObj)
+    protected function filterOffers($offerObj): bool
     {
         return true;
     }

@@ -14,23 +14,19 @@ class JoomlaParser implements Offer\IGetOffer
 
     public function getOffer()
     {
-        $limit = 40;
-        $offset = 0;
-        while (true) {
-            $products = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
-                'select' => [
-                    '*',
-                    'category_id' => 'CATEGORIES.category_id',
-                    'category_parent_id' => 'CATEGORIES.category_parent_id',
-                    'CATEGORIES.*',
-                    'category_name' => 'CATEGORIES.name_ru-RU',
-                ],
-                'limit' => $limit,
-                'offset' => $offset
-            ])->fetchAll();
-            if (empty($products)) break;
-            $offset += $limit;
-            foreach ($products as $product) {
+        $req = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
+            'select' => [
+                '*',
+                'category_id' => 'CATEGORIES.category_id',
+                'category_parent_id' => 'CATEGORIES.category_parent_id',
+                'CATEGORIES.*',
+                'category_name' => 'CATEGORIES.name_ru-RU',
+            ],
+            'limit' => 100
+        ]);
+
+
+        while ($product = $req->fetch()) {
                 $offer = [];
                 $offer['id'] = (int)$product['product_id'];
                 $offer['price'] = (float)$product['product_price'];
@@ -96,7 +92,6 @@ class JoomlaParser implements Offer\IGetOffer
                 if ($this->filterOffers($offerObj)) {
                     yield $offerObj;
                 }
-            }
         }
     }
 
@@ -107,8 +102,6 @@ class JoomlaParser implements Offer\IGetOffer
      */
     protected function filterOffers($offerObj)
     {
-//        if ($offerObj->id == 97)
-//            return true;
         return true;
     }
 

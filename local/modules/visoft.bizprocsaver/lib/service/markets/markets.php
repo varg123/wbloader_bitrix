@@ -18,12 +18,18 @@ class Markets
     public static function loadOffers()
     {
         $parser = new JoomlaParser();
-        $i=0;
-        $cnt=100;
+        $i = 0;
+        $cnt = 100;
         foreach ($parser->getOffer() as $offer) {
             OfferTable::saveOffer($offer);
             $i++;
-            if($i>$cnt) break;
+            if ($i > $cnt) break;
         }
+    }
+
+    public static function resetUpdate()
+    {
+        global $DB;
+        $DB->Query('update b_wb_offers set is_update="N"');
     }
 }

@@ -194,19 +194,19 @@ class WBQuery
                 'card' => $card->toArray(),
             ]
         ];
+        $param = json_encode($param, JSON_UNESCAPED_UNICODE);
         if ($card) {
             $this->curl->post('https://suppliers-api.wildberries.ru/card/update', $param);
-            $responce = json_decode($this->curl->response, true);
-            if ($this->curl->http_status_code == '200') {
-                if ($responce['error']['message']) {
-                    throw new RequestException($responce['error']['message']);
+            $responce = json_decode(json_encode($this->curl->response), true);
+            if ($this->curl->http_status_code == 200) {
+                if ($responce['error']) {
+                    throw new \Exception(json_encode($responce['error'], JSON_UNESCAPED_UNICODE));
                 }
-                return $responce;
-            } else {
-                throw new RequestException(serialize($responce));
+                return true;
             }
+            throw new \Exception(serialize($responce));
         }
-        return null;
+        return false;
     }
 
     public function cardCreate($card)

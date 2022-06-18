@@ -16,8 +16,8 @@ class Market1 extends Market
     function changeOffer($offer): Offer
     {
 
-        $offer->vendorCode = 'testq' . $offer->product_ean;
-        $offer->vendorCodeSupplier = 'testqs' . $offer->product_ean;
+        $offer->vendorCode = 'mrk' . $offer->product_ean;
+        $offer->vendorCodeSupplier = 'mrks' . $offer->product_ean;
         if ($offer->price < 100) {
             $offer->price = $offer->price + $offer->price * 3.5;
         } elseif ($offer->price < 400) {
@@ -44,18 +44,18 @@ class Market1 extends Market
 
     function getId(): string
     {
-        return 'wb1';
+        return 'mrk';
     }
 
     function getToken(): string
     {
-//        \COption::GetOptionString('visoft.pizprocsaver', 'key.'.self::getId());
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjIzNTMyOTIzLTY0MjgtNDI3Ny1hODY2LWY3ZTk0NzJjYTMyNiJ9.myxXRKj4Tavq75fe7VqgWqH0pNc3iH3vC3TNPgmBrpc';
+        return \COption::GetOptionString('visoft.pizprocsaver', 'key.'.self::getId());
+//        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6IjIzNTMyOTIzLTY0MjgtNDI3Ny1hODY2LWY3ZTk0NzJjYTMyNiJ9.myxXRKj4Tavq75fe7VqgWqH0pNc3iH3vC3TNPgmBrpc';
     }
 
     function getWarehouseId(): int
     {
-//        \COption::GetOptionString('visoft.pizprocsaver', 'warehouse.'.self::getId());
-        return 110;
+        return \COption::GetOptionString('visoft.pizprocsaver', 'warehouse.'.self::getId());
+//        return 110;
     }
 }

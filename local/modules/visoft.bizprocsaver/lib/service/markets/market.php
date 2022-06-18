@@ -138,7 +138,7 @@ abstract class Market// implements IMarket
         } catch (\Exception $e) {
             \CEventLog::Add([
                 "SEVERITY" => "SECURITY",
-                "AUDIT_TYPE_ID" => "MY_OWN_TYPE",
+                "AUDIT_TYPE_ID" => "WB_ERROR",
                 "MODULE_ID" => "main",
                 "ITEM_ID" => static::getId(),
                 "DESCRIPTION" => $e->getMessage(),
@@ -174,7 +174,7 @@ abstract class Market// implements IMarket
             } catch (\Exception $e) {
                 \CEventLog::Add([
                     "SEVERITY" => "SECURITY",
-                    "AUDIT_TYPE_ID" => "OUTLET_ERROR",
+                    "AUDIT_TYPE_ID" => "WB_ERROR",
                     "MODULE_ID" => "main",
                     "ITEM_ID" => static::getId(),
                     "DESCRIPTION" => $e->getMessage(),
