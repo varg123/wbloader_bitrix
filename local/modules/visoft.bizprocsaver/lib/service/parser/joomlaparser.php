@@ -73,6 +73,7 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetch()['name_ru-RU'];
                 $offer['material'] = $material;
                 $offer['quantity'] = (int)$product['product_quantity'];
+                $offer['product_ean'] = (string)$product['product_ean'];
                 $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']), 0, 1000);
 
                 if ($product['category_parent_id']) {
@@ -87,7 +88,7 @@ class JoomlaParser implements Offer\IGetOffer
                 }
 
                 $desc = strip_tags((string)$product['description_ru-RU']);
-                $desc = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/', '', $desc);
+                $desc = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/u', '', $desc);
                 $offer['description'] = mb_substr($desc, 0, 1000);
 
                 $offerObj = new Offer\Offer($offer);

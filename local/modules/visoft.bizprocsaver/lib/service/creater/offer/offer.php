@@ -9,6 +9,7 @@ class Offer extends DataTransferObject
 {
     public $id;
     public $price;
+    public $product_ean;
     public $category;
     public $parentCategory = null;
     public $weight;

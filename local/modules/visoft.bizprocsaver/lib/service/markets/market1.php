@@ -16,8 +16,8 @@ class Market1 extends Market
     function changeOffer($offer): Offer
     {
 
-        $offer->vendorCode = 'testq' . $offer->id;
-        $offer->vendorCodeSupplier = 'testqs' . $offer->id;
+        $offer->vendorCode = 'testq' . $offer->product_ean;
+        $offer->vendorCodeSupplier = 'testqs' . $offer->product_ean;
         if ($offer->price < 100) {
             $offer->price = $offer->price + $offer->price * 3.5;
         } elseif ($offer->price < 400) {
