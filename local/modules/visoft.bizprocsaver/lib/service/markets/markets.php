@@ -11,7 +11,8 @@ class Markets
     public function getMarkets(): array
     {
         return [
-            new \ViSoft\BizProcSaver\Service\Markets\Market1(),
+            new \ViSoft\BizProcSaver\Service\Markets\Market1(),//ООО Маркетплейс
+            new \ViSoft\BizProcSaver\Service\Markets\Market2(),//Качусов
         ];
     }
 

@@ -6,7 +6,7 @@ namespace ViSoft\BizProcSaver\Service\Markets;
 
 use ViSoft\BizProcSaver\Service\Creater\Offer\Offer;
 
-class Market1 extends Market
+class Market2 extends Market
 {
 
     /**
@@ -15,8 +15,8 @@ class Market1 extends Market
      */
     function changeOffer($offer): Offer
     {
-        $offer->vendorCode = 'mrk' . $offer->product_ean;
-        $offer->vendorCodeSupplier = 'mrks' . $offer->product_ean;
+        $offer->vendorCode = 'kach' . $offer->product_ean;
+        $offer->vendorCodeSupplier = 'kachs' . $offer->product_ean;
         if ($offer->price < 100) {
             $offer->price = $offer->price + $offer->price * 3.5;
         } elseif ($offer->price < 400) {
@@ -43,7 +43,7 @@ class Market1 extends Market
 
     function getId(): string
     {
-        return 'mrk';
+        return 'kach';
     }
 
     function getToken(): string
