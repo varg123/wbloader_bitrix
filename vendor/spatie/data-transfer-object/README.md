@@ -1,3 +1,6 @@
+
+[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/support-ukraine.svg?t=1" />](https://supportukrainenow.org)
+
 # Data transfer objects with batteries included
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/data-transfer-object.svg?style=flat-square)](https://packagist.org/packages/spatie/data-transfer-object)
@@ -12,7 +15,7 @@ You can install the package via composer:
 composer require spatie/data-transfer-object
 ```
 
-* **Note**: This package requires PHP 7.4 so it can take full advantage of type casting in PHP.
+* **Note**: v3 of this package only supports `php:^8.0`. If you're looking for the older version, check out [v2](https://github.com/spatie/data-transfer-object/tree/v2).
 
 ## Support us
 
@@ -22,344 +25,319 @@ We invest a lot of resources into creating [best in class open source packages](
 
 We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
-## Have you ever…
+## Usage
 
-… worked with an array of data, retrieved from a request, a CSV file or a JSON API; and wondered what was in it?
-
-Here's an example:
+The goal of this package is to make constructing objects from arrays of (serialized) data as easy as possible. Here's what a DTO looks like:
 
 ```php
-public function handleRequest(array $dataFromRequest)
+use Spatie\DataTransferObject\Attributes\MapFrom;
+use Spatie\DataTransferObject\DataTransferObject;
+
+class MyDTO extends DataTransferObject
 {
-    $dataFromRequest[/* what to do now?? */];
+    public OtherDTO $otherDTO;
+    
+    public OtherDTOCollection $collection;
+    
+    #[CastWith(ComplexObjectCaster::class)]
+    public ComplexObject $complexObject;
+    
+    public ComplexObjectWithCast $complexObjectWithCast;
+    
+    #[NumberBetween(1, 100)]
+    public int $a;
+    
+    #[MapFrom('address.city')]
+    public string $city;
 }
 ```
 
-The goal of this package is to structure "unstructured data", which is normally stored in associative arrays.
-By structuring this data into an object, we gain several advantages:
-
-- We're able to type hint data transfer objects, instead of just calling them `array`.
-- By making all properties on our objects typeable, we're sure that their values are never something we didn't expect.
-- Because of typed properties, we can statically analyze them and have auto completion.
-
-Let's look at the example of a JSON API call:
+You could construct this DTO like so:
 
 ```php
-$post = $api->get('posts', 1); 
-
-[
-    'title' => '…',
-    'body' => '…',
-    'author_id' => '…',
-]
+$dto = new MyDTO(
+    a: 5,
+    collection: [
+        ['id' => 1],
+        ['id' => 2],
+        ['id' => 3],
+    ],
+    complexObject: [
+        'name' => 'test',
+    ],
+    complexObjectWithCast: [
+        'name' => 'test',
+    ],
+    otherDTO: ['id' => 5],
+);
 ```
 
-Working with this array is difficult, as we'll always have to refer to the documentation to know what's exactly in it. 
-This package allows you to create data transfer object definitions, classes, which will represent the data in a structured way.
+Let's discuss all possibilities one by one.
 
-We did our best to keep the syntax and overhead as little as possible:
+## Named arguments
+
+Constructing a DTO can be done with named arguments. It's also possible to still use the old array notation. This example is equivalent to the one above.
 
 ```php
-use App\Models\Author;
-use Spatie\DataTransferObject\DataTransferObject;
+$dto = new MyDTO([
+    'a' => 5,
+    'collection' => [
+        ['id' => 1],
+        ['id' => 2],
+        ['id' => 3],
+    ],
+    'complexObject' => [
+        'name' => 'test',
+    ],
+    'complexObjectWithCast' => [
+        'name' => 'test',
+    ],
+    'otherDTO' => ['id' => 5],
+]);
+```
 
-class PostData extends DataTransferObject
+## Value casts
+
+If a DTO has a property that is another DTO or a DTO collection, the package will take care of automatically casting arrays of data to those DTOs:
+
+```php
+$dto = new MyDTO(
+    collection: [ // This will become an object of class OtherDTOCollection
+        ['id' => 1],
+        ['id' => 2], // Each item will be an instance of OtherDTO
+        ['id' => 3],
+    ],
+    otherDTO: ['id' => 5], // This data will be cast to OtherDTO
+);
+```
+
+### Custom casters
+
+You can build your own caster classes, which will take whatever input they are given, and will cast that input to the desired result.
+
+Take a look at the `ComplexObject`:
+
+```php
+class ComplexObject
 {
+    public string $name;
+}
+```
+
+And its caster `ComplexObjectCaster`:
+
+```php
+use Spatie\DataTransferObject\Caster;
+
+class ComplexObjectCaster implements Caster
+{
+    /**
+     * @param array|mixed $value
+     *
+     * @return mixed
+     */
+    public function cast(mixed $value): ComplexObject
+    {
+        return new ComplexObject(
+            name: $value['name']
+        );
+    }
+}
+```
+
+### Class-specific casters
+
+Instead of specifying which caster should be used for each property, you can also define that caster on the target class itself:
+
+```php
+class MyDTO extends DataTransferObject
+{
+    public ComplexObjectWithCast $complexObjectWithCast;
+}
+```
+
+```php
+#[CastWith(ComplexObjectWithCastCaster::class)]
+class ComplexObjectWithCast
+{
+    public string $name;
+}
+```
+
+### Default casters
+
+It's possible to define default casters on a DTO class itself. These casters will be used whenever a property with a given type is encountered within the DTO class.
+
+```php
+#[
+    DefaultCast(DateTimeImmutable::class, DateTimeImmutableCaster::class),
+    DefaultCast(MyEnum::class, EnumCaster::class),
+]
+abstract class BaseDataTransferObject extends DataTransferObject
+{
+    public MyEnum $status; // EnumCaster will be used
+    
+    public DateTimeImmutable $date; // DateTimeImmutableCaster will be used
+}
+```
+
+### Using custom caster arguments
+
+Any caster can be passed custom arguments, the built-in [`ArrayCaster` implementation](https://github.com/spatie/data-transfer-object/blob/master/src/Casters/ArrayCaster.php) is a good example of how this may be used.
+
+Using named arguments when passing input to your caster will help make your code more clear, but they are not required.
+
+For example:
+
+```php
+    /** @var \Spatie\DataTransferObject\Tests\Foo[] */
+    #[CastWith(ArrayCaster::class, itemType: Foo::class)]
+    public array $collectionWithNamedArguments;
+    
+    /** @var \Spatie\DataTransferObject\Tests\Foo[] */
+    #[CastWith(ArrayCaster::class, Foo::class)]
+    public array $collectionWithoutNamedArguments;
+```
+
+Note that the first argument passed to the caster constructor is always the array with type(s) of the value being casted.
+All other arguments will be the ones passed as extra arguments in the `CastWith` attribute.
+
+## Validation
+
+This package doesn't offer any specific validation functionality, but it does give you a way to build your own validation attributes. For example, `NumberBetween` is a user-implemented validation attribute:
+
+```php
+class MyDTO extends DataTransferObject
+{
+    #[NumberBetween(1, 100)]
+    public int $a;
+}
+```
+
+It works like this under the hood:
+
+```php
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+class NumberBetween implements Validator
+{
+    public function __construct(
+        private int $min,
+        private int $max
+    ) {
+    }
+
+    public function validate(mixed $value): ValidationResult
+    {
+        if ($value < $this->min) {
+            return ValidationResult::invalid("Value should be greater than or equal to {$this->min}");
+        }
+
+        if ($value > $this->max) {
+            return ValidationResult::invalid("Value should be less than or equal to {$this->max}");
+        }
+
+        return ValidationResult::valid();
+    }
+}
+```
+
+## Mapping
+
+You can map a DTO property from a source property with a different name using the `#[MapFrom]` attribute.
+
+It works with a "dot" notation property name or an index.
+
+```php
+class PostDTO extends DataTransferObject
+{
+    #[MapFrom('postTitle')]
     public string $title;
     
-    public string $body;
-    
-    public Author $author;
-}
-```
-
-An object of `PostData` can from now on be constructed like so:
-
-```php
-$postData = new PostData([
-    'title' => '…',
-    'body' => '…',
-    'author_id' => '…',
-]);
-```
-
-Now you can use this data in a structured way:
-
-```php
-$postData->title;
-$postData->body;
-$postData->author_id;
-```
-
-It's, of course, possible to add static constructors to `PostData`:
-
-```php
-use App\Models\Author;
-use Spatie\DataTransferObject\DataTransferObject;
-
-class PostData extends DataTransferObject
-{
-    // …
-    
-    public static function fromRequest(Request $request): self
-    {
-        return new self([
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-            'author' => Author::find($request->input('author_id')),
-        ]);
-    }
-}
-```
-
-When defining typed properties, you can take advantage of the built-in types supported by PHP. These properties will be validated against the given type and a `TypeError` will be thrown if the value does not comply with it.
-
-```php
-use App\Models\Author;
-use Iterator;
-use Spatie\DataTransferObject\DataTransferObject;
-
-class PostData extends DataTransferObject
-{
-    /**
-     * Built in types:
-     */
-    public string $property;
-
-    /**
-     * Imported class or fully qualified class name:
-     */
-    public Author $property;
-
-    /**
-     * Nullable types:
-     */
-    public ?string $property;
-    
-    /**
-     * Any iterator:
-     */
-    public Iterator $property;
-    
-    /**
-     * No type, which allows everything
-     */
-    public $property;
-}
-```
-
-By adding doc blocks to our properties we can enforce stricter typing. Below are the possible ways of declaring types with doc blocks.
-
-* **Attention**: When type casting to a class, your Docblock definition needs to be a Fully Qualified Class Name (`\App\Models\Author` instead of `Author` and a use statement at the top).
-
-```php
-use Spatie\DataTransferObject\DataTransferObject;
-
-class PostData extends DataTransferObject
-{
-    /**
-     * Built in types: 
-     *
-     * @var string 
-     */
-    public $property;
-    
-    /**
-     * Classes with their FQCN: 
-     *
-     * @var \App\Models\Author
-     */
-    public $property;
-    
-    /**
-     * Lists of types: 
-     *
-     * @var \App\Models\Author[]
-     */
-    public $property;
-    
-    /**
-     * Iterator of types: 
-     *
-     * @var iterator<\App\Models\Author>
-     */
-    public $property;
-    
-    /**
-     * Union types: 
-     *
-     * @var string|int
-     */
-    public $property;
-    
-    /**
-     * Nullable types: 
-     *
-     * @var string|null
-     */
-    public $property;
-    
-    /**
-     * Mixed types: 
-     *
-     * @var mixed|null
-     */
-    public $property;
-    
-    /**
-     * Any iterator : 
-     *
-     * @var iterator
-     */
-    public $property;
-    
-    /**
-     * No type, which allows everything
-     */
-    public $property;
-}
-```
-
-### Working with collections
-
-If you're working with collections of DTOs, you probably want auto completion and proper type validation on your collections too.
-This package adds a simple collection implementation, which you can extend from.
-
-```php
-use App\DataTransferObjects\PostData;
-use Spatie\DataTransferObject\DataTransferObjectCollection;
-
-class PostCollection extends DataTransferObjectCollection
-{
-    public function current(): PostData
-    {
-        return parent::current();
-    }
-}
-```
-
-By overriding the `current` method, you'll get auto completion in your IDE.
-Alternatively you can also use a phpdoc for this:
-
-```php
-use Spatie\DataTransferObject\DataTransferObjectCollection;
-
-/**
- * @method \App\DataTransferObjects\PostData current
- */
-class PostCollection extends DataTransferObjectCollection
-{
-}
-```
-
-Then you can use the collections like so:
-
-```php
-foreach ($postCollection as $postData) {
-    $postData-> // … your IDE will provide autocompletion.
+    #[MapFrom('user.name')]
+    public string $author;
 }
 
-$postCollection[0]-> // … and also here.
-```
-
-Of course you're free to implement your own static constructors:
-
-```php
-use App\DataTransferObjects\PostData;
-use Spatie\DataTransferObject\DataTransferObjectCollection;
-
-class PostCollection extends DataTransferObjectCollection
-{
-    public static function create(array $data): PostCollection
-    {
-        return new static(PostData::arrayOf($data));
-    }
-}
-```
-
-### Automatic casting of nested DTOs
-
-If you've got nested DTO fields, data passed to the parent DTO will automatically be cast.
-
-```php
-use App\DataTransferObjects\AuthorData;
-use Spatie\DataTransferObject\DataTransferObject;
-
-class PostData extends DataTransferObject
-{
-    public AuthorData $author;
-}
-```
-
-`PostData` can now be constructed like so:
-
-```php
-$postData = new PostData([
-    'author' => [
-        'name' => 'Foo',
-    ],
-]);
-```
-
-### Automatic casting of nested array DTOs
-
-Similarly to above, nested array DTOs will automatically be cast. For example, we can define the following DTO:
-
-```php
-namespace App\DataTransferObjects;
-
-use Spatie\DataTransferObject\DataTransferObject;
-
-class TagData extends DataTransferObject
-{
-   public string $name;
-}
-```
-
-By referencing this object in our `PostData` DTO, a `TagData` DTO will be automatically cast.
-
-```php
-namespace App\DataTransferObjects;
-
-use Spatie\DataTransferObject\DataTransferObject;
-
-class PostData extends DataTransferObject
-{
-    /** @var \App\DataTransferObjects\TagData[] */
-   public $tags;
-}
-```
-
-`PostData` will automatically construct tags like such:
-
-```php
-$postData = new PostData([
-    'tags' => [
-        ['name' => 'foo'],
-        ['name' => 'bar']
-    ]
-]);
-```
-**Attention**: Remember, for nested type casting to work, your Docblock definition needs to be a Fully Qualified Class Name (`\App\DataTransferObjects\TagData[]` instead of `TagData[]` and a use statement at the top).
-
-### Immutability
-
-If you want your data object to be never changeable (this is a good idea in some cases), you can make them immutable:
-
-```php
-$postData = PostData::immutable([
-    'tags' => [
-        ['name' => 'foo'],
-        ['name' => 'bar']
+$dto = new PostDTO([
+    'postTitle' => 'Hello world',
+    'user' => [
+        'name' => 'John Doe'
     ]
 ]);
 ```
 
-Trying to change a property of `$postData` after it's constructed, will result in a `DataTransferObjectError`.
+```php
+class UserDTO extends DataTransferObject
+{
 
-### Helper functions
+    #[MapFrom(0)]
+    public string $firstName;
+    
+    #[MapFrom(1)]
+    public string $lastName;
+}
 
-There are also some helper functions provided for working with multiple properties at once. 
+$dto = new UserDTO(['John', 'Doe']);
+```
+
+Sometimes you also want to map them during the transformation to Array. 
+A typical usecase would be transformation from camel case to snake case. 
+For that you can use the `#[MapTo]` attribute.
+
+```php
+class UserDTO extends DataTransferObject
+{
+
+    #[MapFrom(0)]
+    #[MapTo('first_name')]
+    public string $firstName;
+    
+    #[MapFrom(1)]
+    #[MapTo('last_name')]
+    public string $lastName;
+}
+
+$dto = new UserDTO(['John', 'Doe']);
+$dto->toArray() // ['first_name' => 'John', 'last_name'=> 'Doe'];
+$dto->only('first_name')->toArray() // ['first_name' => 'John'];
+```
+
+## Strict DTOs
+
+The previous version of this package added the `FlexibleDataTransferObject` class which allowed you to ignore properties that didn't exist on the DTO. This behaviour has been changed, all DTOs are flexible now by default, but you can make them strict by using the `#[Strict]` attribute:
+
+
+```php
+class NonStrictDto extends DataTransferObject
+{
+    public string $name;
+}
+
+// This works
+new NonStrictDto(
+    name: 'name',
+    unknown: 'unknown'
+);
+```
+
+```php
+use \Spatie\DataTransferObject\Attributes\Strict;
+
+#[Strict]
+class StrictDto extends DataTransferObject
+{
+    public string $name;
+}
+
+// This throws a \Spatie\DataTransferObject\Exceptions\UnknownProperties exception
+new StrictDto(
+    name: 'name',
+    unknown: 'unknown'
+);
+```
+
+## Helper functions
+
+There are also some helper functions provided for working with multiple properties at once.
 
 ```php
 $postData->all();
@@ -371,9 +349,11 @@ $postData
 $postData
     ->except('author')
     ->toArray();
-``` 
+```
 
-You can also chain these methods:
+Note that `all()` will simply return all properties, while `toArray()` will cast nested DTOs to arrays as well. 
+
+You can chain the `except()` and `only()` methods:
 
 ```php
 $postData
@@ -382,61 +362,110 @@ $postData
     ->toArray();
 ```
 
-It's important to note that `except` and `only` are immutable, they won't change the original data transfer object.
+It's important to note that `except()` and `only()` are immutable, they won't change the original data transfer object.
 
-### Exception handling
+## Immutable DTOs and cloning
 
-Beside property type validation, you can also be certain that the data transfer object in its whole is always valid.
-On constructing a data transfer object, we'll validate whether all required (non-nullable) properties are set. 
-If not, a `Spatie\DataTransferObject\DataTransferObjectError` will be thrown.
-
-Likewise, if you're trying to set non-defined properties, you'll get a `DataTransferObjectError`.
-
-### Flexible Data Transfer Objects
-Sometimes you might want to be able to instantiate a DTO with a subset of an array. A good example of this is a large
-API response where only a small amount of the fields are used. Normally, if you tried to instantiate a standard DTO
-with superfluous properties, a `DataTransferObjectError` will be throw.
-
-You can avoid this behaviour by instead extending from `FlexibleDataTransferObject`. For example:
+This package doesn't force immutable objects since PHP doesn't support them, but you're always encouraged to keep your DTOs immutable. To help you, there's a `clone` method on every DTO which accepts data to override:
 
 ```php
-use Spatie\DataTransferObject\FlexibleDataTransferObject;
+$clone = $original->clone(other: ['name' => 'a']);
+```
 
-class PostData extends FlexibleDataTransferObject
+Note that no data in `$original` is changed.
+
+## Collections of DTOs
+
+This version removes the `DataTransferObjectCollection` class. Instead you can use simple casters and your own collection classes.
+
+Here's an example of casting a collection of DTOs to an array of DTOs:
+
+```php
+class Bar extends DataTransferObject
 {
-    public string $content;
+    /** @var \Spatie\DataTransferObject\Tests\Foo[] */
+    #[CastWith(FooArrayCaster::class)]
+    public array $collectionOfFoo;
 }
 
-
-// No errors thrown
-$dto = new PostData([
-    'author' => [
-        'id' => 1,
-    ],
-    'content' => 'blah blah',
-    'created_at' => '2020-01-02',
-]);
-
-$dto->toArray(); // ['content' => 'blah blah']
+class Foo extends DataTransferObject
+{
+    public string $name;
+}
 ```
 
-### PHPStan
+```php
+class FooArrayCaster implements Caster
+{
+    public function cast(mixed $value): array
+    {
+        if (! is_array($value)) {
+            throw new Exception("Can only cast arrays to Foo");
+        }
 
-If you're using [phpstan](https://phpstan.org/) and set `checkUninitializedProperties: true`, phpstan by default doesn't understand that the DTO properties will always be correctly initialized.
-
-To help with that, this package provides a rule you can add to your `.neon` config file:
-```yaml
-services:
-  -
-    class: Spatie\DataTransferObject\PHPstan\PropertiesAreAlwaysInitializedExtension
-    tags:
-      - phpstan.properties.readWriteExtension
-#…
-parameters:
-  checkUninitializedProperties: true
+        return array_map(
+            fn (array $data) => new Foo(...$data),
+            $value
+        );
+    }
+}
 ```
 
-### Testing
+If you don't want the redundant typehint, or want extended collection functionality; you could create your own collection classes using any collection implementation. In this example, we use Laravel's:
+
+```php
+class Bar extends DataTransferObject
+{
+    #[CastWith(FooCollectionCaster::class)]
+    public CollectionOfFoo $collectionOfFoo;
+}
+
+class Foo extends DataTransferObject
+{
+    public string $name;
+}
+```
+
+```php
+use Illuminate\Support\Collection;
+
+class CollectionOfFoo extends Collection
+{
+    // Add the correct return type here for static analyzers to know which type of array this is 
+    public function offsetGet($key): Foo
+    {
+        return parent::offsetGet($key);
+    }
+}
+```
+
+```php
+class FooCollectionCaster implements Caster
+{
+    public function cast(mixed $value): CollectionOfFoo
+    {
+        return new CollectionOfFoo(array_map(
+            fn (array $data) => new Foo(...$data),
+            $value
+        ));
+    }
+}
+```
+
+## Simple arrays of DTOs
+
+For a simple array of DTOs, or an object that implements PHP's built-in `ArrayAccess`, consider using the `ArrayCaster` which requires an item type to be provided:
+
+```php
+class Bar extends DataTransferObject
+{
+    /** @var \Spatie\DataTransferObject\Tests\Foo[] */
+    #[CastWith(ArrayCaster::class, itemType: Foo::class)]
+    public array $collectionOfFoo;
+}
+```
+
+## Testing
 
 ``` bash
 composer test
@@ -448,11 +477,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ### Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
 
 ## Postcardware
 
@@ -465,8 +494,7 @@ We publish all received postcards [on our company website](https://spatie.be/en/
 ## External tools
 
 - [json2dto](https://json2dto.atymic.dev): a GUI to convert JSON objects to DTO classes (with nesting support). Also provides a [CLI tool](https://github.com/atymic/json2dto#cli-tool) for local usage.
-- [Data Transfer Object Factory](https://github.com/anteris-dev/data-transfer-object-factory): generates a DTO instance or collection with fake data based on its definition. Supports type casting and doc blocks.
-- [Laravel Castable Data Transfer Object](https://github.com/jessarcher/laravel-castable-data-transfer-object): Allow casting to and from DTO instances directly from JSON columns using Eloquent.
+- [Data Transfer Object Factory](https://github.com/anteris-dev/data-transfer-object-factory): Intelligently generates a DTO instance using the correct content for your properties based on its name and type.
 
 ## Credits
 

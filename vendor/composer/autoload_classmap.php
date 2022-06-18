@@ -6,7 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'CaseInsensitiveArray' => $vendorDir . '/php-curl-class/php-curl-class/src/Curl.class.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'Curl' => $vendorDir . '/php-curl-class/php-curl-class/src/Curl.class.php',
+    'Curl\\CaseInsensitiveArray' => $vendorDir . '/php-curl-class/php-curl-class/src/Curl/Curl.php',
+    'Curl\\Curl' => $vendorDir . '/php-curl-class/php-curl-class/src/Curl/Curl.php',
 );

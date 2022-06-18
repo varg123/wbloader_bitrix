@@ -21,9 +21,9 @@ class ComposerStaticInit6319100c31b2397877da67811b63efb2
     );
 
     public static $classMap = array (
-        'CaseInsensitiveArray' => __DIR__ . '/..' . '/php-curl-class/php-curl-class/src/Curl.class.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Curl' => __DIR__ . '/..' . '/php-curl-class/php-curl-class/src/Curl.class.php',
+        'Curl\\CaseInsensitiveArray' => __DIR__ . '/..' . '/php-curl-class/php-curl-class/src/Curl/Curl.php',
+        'Curl\\Curl' => __DIR__ . '/..' . '/php-curl-class/php-curl-class/src/Curl/Curl.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
