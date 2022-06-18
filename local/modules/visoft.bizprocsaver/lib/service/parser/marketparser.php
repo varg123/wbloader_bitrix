@@ -17,27 +17,21 @@ class MarketParser implements Offer\IGetOffer
 
     public function getOffer(): \Generator
     {
-        $limit = 100;
-        $offset = 0;
-        while (true) {
-            $products = CardsTable::getList([
-                'select' => [
-                    '*',
-                ],
-                'filter' => [
-                    '=wbId' => $this->wbId
-                ],
-                'limit' => $limit,
-                'offset' => $offset
-            ])->fetchAll();
-            if (empty($products)) break;
-            $offset+=$limit;
-            foreach ($products as $product) {
-                $offerObj = unserialize($product['data']);
-                $offerObj = $this->convertOffer($offerObj);
-                if ($this->filterOffers($offerObj)) {
-                    yield $offerObj;
-                }
+        $req = CardsTable::getList([
+            'select' => [
+                '*',
+                'OFFER.is_update'
+            ],
+            'filter' => [
+                '=wbId' => $this->wbId,
+                '=OFFER.is_update' => 'Y'
+            ],
+        ]);
+        while ($product = $req->fetch()) {
+            $offerObj = unserialize($product['data']);
+            $offerObj = $this->convertOffer($offerObj);
+            if ($this->filterOffers($offerObj)) {
+                yield $offerObj;
             }
         }
     }

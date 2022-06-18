@@ -14,22 +14,23 @@ class JoomlaParser implements Offer\IGetOffer
 
     public function getOffer()
     {
-        $limit = 100;
-        $offset = 0;
+
+        $i = 0;
+        $cnt = 100;
         while (true) {
-            $products = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
+            $req = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
                 'select' => [
                     '*',
                     'category_id' => 'CATEGORIES.category_id',
+                    'category_parent_id' => 'CATEGORIES.category_parent_id',
                     'CATEGORIES.*',
                     'category_name' => 'CATEGORIES.name_ru-RU',
                 ],
-                'limit' => $limit,
-                'offset' => $offset
-            ])->fetchAll();
-            if (empty($products)) break;
-            $offset += $limit;
-            foreach ($products as $product) {
+                'limit' => $cnt,
+                'offset' => $i
+            ]);
+            $i+=$cnt;
+            while ($product = $req->fetch()) {
                 $offer = [];
                 $offer['id'] = (int)$product['product_id'];
                 $offer['price'] = (float)$product['product_price'];
@@ -57,7 +58,7 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetchAll();
 
                 $picturesNames = array_column($res, 'image_name');
-                $tmpUrl = 'http://marketserver.site/components/com_jshopping/files/img_products/full_';
+                $tmpUrl = 'http://marketserver.site/components/com_jshopping/files/img_products/';
                 foreach ($picturesNames as $picName) {
                     $offer['pictures'][] = $tmpUrl . $picName;
                 }
@@ -72,6 +73,23 @@ class JoomlaParser implements Offer\IGetOffer
                 ])->fetch()['name_ru-RU'];
                 $offer['material'] = $material;
                 $offer['quantity'] = (int)$product['product_quantity'];
+                $offer['product_ean'] = (string)$product['product_ean'];
+                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']), 0, 1000);
+
+                if ($product['category_parent_id']) {
+                    $offer['parentCategory'] = CategoriesTable::getList([
+                        'select' => [
+                            '*'
+                        ],
+                        'filter' => [
+                            '=category_id' => $product['category_parent_id'],
+                        ]
+                    ])->fetch()['name_ru-RU'];
+                }
+
+                $desc = strip_tags((string)$product['description_ru-RU']);
+                $desc = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/u', '', $desc);
+                $offer['description'] = mb_substr($desc, 0, 1000);
 
                 $offerObj = new Offer\Offer($offer);
                 $offerObj = $this->convertOffer($offerObj);
@@ -79,7 +97,9 @@ class JoomlaParser implements Offer\IGetOffer
                     yield $offerObj;
                 }
             }
+            if (!$product) return;
         }
+
 
     }
 
