@@ -4,6 +4,7 @@
 namespace ViSoft\BizProcSaver\Service\Markets;
 
 
+use Bitrix\Main\Config\Option;
 use ViSoft\BizProcSaver\Service\Creater\Offer\Offer;
 
 class Market1 extends Market
@@ -53,6 +54,6 @@ class Market1 extends Market
 
     function getWarehouseId(): int
     {
-        return \COption::GetOptionString('visoft.bizprocsaver', 'warehouse.'.static::getId());
+        return 183242;
     }
 }

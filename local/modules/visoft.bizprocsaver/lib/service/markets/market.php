@@ -125,8 +125,10 @@ abstract class Market// implements IMarket
                 '=wbId' => static::getId(),
             ],
         ]);
+
         $prices = [];
         while ($priceData = $res->fetch()) {
+            pre($priceData);
             $prices[] = new Price([
                 'price' => (int)$priceData['price'],
                 'nmId' => (string)$priceData['nmId'],
@@ -151,20 +153,20 @@ abstract class Market// implements IMarket
         $res = CardsTable::getList([
             'select' =>
                 [
+                    'wbId',
                     'outlet',
                     'barcode',
                 ],
             'filter' => [
-                '!nmId' => false,
+                '!barcode' => false,
                 '=wbId' => static::getId(),
             ],
         ]);
         $stocks = [];
         while ($priceData = $res->fetch()) {
             $stocks[] = [
-                'outlet' => (int)$priceData['outlet'],
+                'stock' => (int)$priceData['outlet'],
                 'barcode' => (string)$priceData['barcode'],
-                'warehouseId' => static::getWarehouseId(),
             ];
         }
         $wbRequest = new WBQuery($this->getToken());

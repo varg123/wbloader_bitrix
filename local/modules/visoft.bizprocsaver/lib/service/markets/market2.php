@@ -53,6 +53,6 @@ class Market2 extends Market
 
     function getWarehouseId(): int
     {
-        return \COption::GetOptionString('visoft.bizprocsaver', 'warehouse.'.static::getId());
+        return 178186;
     }
 }

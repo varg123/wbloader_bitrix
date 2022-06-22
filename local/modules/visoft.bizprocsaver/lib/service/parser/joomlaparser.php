@@ -2,6 +2,7 @@
 
 namespace ViSoft\BizProcSaver\Service\Parser;
 
+use Bitrix\Main\Type\DateTime;
 use ViSoft\BizProcSaver\Service\Creater\Offer;
 use ViSoft\BizProcSaver\Service\Joomla\CategoriesTable;
 
@@ -15,13 +16,39 @@ class JoomlaParser implements Offer\IGetOffer
     public function getOffer()
     {
 
-        $limit = 100;
+        $limit = 500;
         $offset = 0;
         $count = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
             'select' => [
                 'product_id',
             ],
+            'filter' => [
+//                '>date_modify' => DateTime::createFromPhp(\DateTime::createFromFormat('d-m','20-06'))
+                '>product_quantity' => 0
+
+            ]
         ])->getSelectedRowsCount();
+//        pre($count);
+//        die();
+//        $count=24000;
+
+        $vendors = array_column(\ViSoft\BizProcSaver\Service\Joomla\ManufacturersTable::getList([
+            'select' => [
+                'name_ru-RU'
+            ],
+            'filter' => [
+//                'manufacturer_id' => $product['product_manufacturer_id']
+            ]
+        ])->fetchAll(),null, 'manufacturer_id');
+
+
+        $categories = array_column(CategoriesTable::getList([
+            'select' => [
+                'name_ru-RU'
+            ],
+        ])->fetchAll(), null, 'category_id');
+
+
         while (true) {
             $products = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
                 'select' => [
@@ -29,6 +56,9 @@ class JoomlaParser implements Offer\IGetOffer
                     'category_id' => 'CATEGORIES.category_id',
                     'CATEGORIES.*',
                     'category_name' => 'CATEGORIES.name_ru-RU',
+                ],
+                'filter' => [
+                  '>product_quantity' => 0
                 ],
                 'limit' => $limit,
                 'offset' => $offset
@@ -40,18 +70,16 @@ class JoomlaParser implements Offer\IGetOffer
                 $offer['id'] = (int)$product['product_id'];
                 $offer['price'] = (float)$product['product_price'];
                 $offer['category'] = $product['category_name'];
-                $offer['model'] = $product['name_ru-RU'];
+//                $offer['model'] = $product['name_ru-RU'];
+
+                $model = strip_tags((string)$product['name_ru-RU']);
+                $model = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/u', '', $model);
+                $offer['model'] = mb_substr($model, 0, 100);
+
                 $offer['weight'] = (float)$product['product_weight'];
                 //product_manufacturer_id
-                $vendor = \ViSoft\BizProcSaver\Service\Joomla\ManufacturersTable::getList([
-                    'select' => [
-                        'name_ru-RU'
-                    ],
-                    'filter' => [
-                        'manufacturer_id' => $product['product_manufacturer_id']
-                    ]
-                ])->fetch()['name_ru-RU'];
-                $offer['vendor'] = $vendor;
+                $offer['vendor'] = $vendors[$product['product_manufacturer_id']]['name_ru-RU'];
+
                 $offer['vendorCode'] = $product['product_ean'];
                 $res = \ViSoft\BizProcSaver\Service\Joomla\ImagesTable::getList([
                     'select' => [
@@ -68,28 +96,21 @@ class JoomlaParser implements Offer\IGetOffer
                     $offer['pictures'][] = $tmpUrl . $picName;
                 }
                 $offer['dimensions'] = $product['extra_field_1'];
-                $material = \ViSoft\BizProcSaver\Service\Joomla\ExtraFieldValuesTable::getList([
-                    'select' => [
-                        'name_ru-RU'
-                    ],
-                    'filter' => [
-                        'field_id' => 2
-                    ]
-                ])->fetch()['name_ru-RU'];
-                $offer['material'] = $material;
+//                $material = \ViSoft\BizProcSaver\Service\Joomla\ExtraFieldValuesTable::getList([
+//                    'select' => [
+//                        'name_ru-RU'
+//                    ],
+//                    'filter' => [
+//                        'field_id' => 2
+//                    ]
+//                ])->fetch()['name_ru-RU'];
+//                $offer['material'] = $material;
+                $offer['material'] = null;
                 $offer['quantity'] = (int)$product['product_quantity'];
                 $offer['product_ean'] = (string)$product['product_ean'];
-                $offer['description'] = mb_substr(strip_tags((string)$product['description_ru-RU']), 0, 1000);
 
                 if ($product['category_parent_id']) {
-                    $offer['parentCategory'] = CategoriesTable::getList([
-                        'select' => [
-                            '*'
-                        ],
-                        'filter' => [
-                            '=category_id' => $product['category_parent_id'],
-                        ]
-                    ])->fetch()['name_ru-RU'];
+                    $offer['parentCategory'] = $categories[$product['category_parent_id']]['name_ru-RU'];
                 }
 
                 $desc = strip_tags((string)$product['description_ru-RU']);

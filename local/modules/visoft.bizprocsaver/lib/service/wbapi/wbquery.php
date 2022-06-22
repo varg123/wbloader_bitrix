@@ -129,9 +129,11 @@ class WBQuery
                 'stock' => (int)$item['stock'],
             ];
         }
+
+        $param = json_encode($param, JSON_UNESCAPED_UNICODE);
         if ($param) {
-            $res = $this->curl->post('https://suppliers-api.wildberries.ru/api/v2/stocks', $param);
-            $responce = json_decode($this->curl->response, true);
+            $this->curl->post('https://suppliers-api.wildberries.ru/api/v2/stocks', $param);
+            $responce = json_decode(json_encode($this->curl->response), true);
             if ($this->curl->http_status_code == '200') {
                 if ($responce['data']['errors']) {
                     throw new \Exception(serialize($responce['data']['errors']));
