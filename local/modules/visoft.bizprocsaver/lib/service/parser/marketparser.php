@@ -15,13 +15,17 @@ class MarketParser implements Offer\IGetOffer
         $this->wbId = $wbId;
     }
 
-    public function getOffer(): \Generator
+    public function getOffer()
     {
         $limit = 100;
         $offset = 0;
         $count = CardsTable::getList([
             'select' => [
                 'id',
+            ],
+            'filter' => [
+                '=wbId' => $this->wbId,
+                '=OFFER.is_update' => 'Y',
             ],
         ])->getSelectedRowsCount();
         while (true) {

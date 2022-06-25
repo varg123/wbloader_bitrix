@@ -17,6 +17,8 @@ use ViSoft\BizProcSaver\Tables\CardsTable;
 abstract class Market// implements IMarket
 {
 
+    abstract function getWarehouseIds(): array ;
+
     abstract function getId(): string;
 
     abstract function changeOffer($offer): Offer;
@@ -66,41 +68,41 @@ abstract class Market// implements IMarket
              */
             $card = null;
             try {
-                if ($barcode) {
-                    $card = $this->findCardByBarcode($wbRequest, $barcode);
+                $vendorCode = $offerObject->vendorCode;
+                if ($vendorCode) {
+                    $cardRes = $this->findCardByVendorCode($wbRequest, $vendorCode);
+                    if ($cardRes) $card = $cardRes;
                 }
-                if (is_null($card) and $vendorCode) {
-                    $card = $this->findCardByVendorCode($wbRequest, $vendorCode);
-                }
-                if (!$barcode and !$vendorCode and is_null($card)) {
+                if (is_null($card)) {
                     if (is_null($offerObject->barcode)) {
-                        $offerObject->barcode = current($wbRequest->getBarcodes(1));
+                        $barcode = current($wbRequest->getBarcodes(1));
+                        if ($barcode) {
+                            $offerObject->barcode = $barcode;
+                        }
+                        $card = $cardCreator->createCard($offerObject);
+                        $wbRequest->cardCreate($card);
                     }
-                    //todo: добавить эксепшены в методе
-                    $card = $cardCreator->createCard($offerObject);
-
-                    $wbRequest->cardCreate($card);
                 } elseif ($card) {
-                    $card = $cardCreator->updateCard($card, $offerObject);
-                    $wbRequest->cardUpdate($card);
-                } else {
-                    throw new Exception("Карточка пропала после обновления");
+                    if (is_null($offerObject->barcode)) {
+                        $barcode = current(current($card->nomenclatures)->variations)->barcode;
+                        $barcode = $barcode ? $barcode : current(current($card->nomenclatures)->variations)->barcodes[0];
+                        if ($barcode) {
+                            $offerObject->barcode = $barcode;
+                        }
+                        $cardCreator->updateCard($card, $offerObject);
+                        $wbRequest->cardUpdate($card);
+                    }
                 }
-
                 if ($card) {
                     $vendorCode = current($card->nomenclatures)->vendorCode;
-
                     $barcode = current(current($card->nomenclatures)->variations)->barcode;
                     $barcode = $barcode ? $barcode : current(current($card->nomenclatures)->variations)->barcodes[0];
-
                     $nmId = current($card->nomenclatures)->nmId;
                     $nmId = $nmId ? $nmId : 0;
                     /**
                      * @var $offer Offer
                      */
                     CardsTable::setIds(static::getId(), $offer->id, $nmId, $barcode, $vendorCode);
-                } else {
-                    throw new Exception("Карточка не найдена после создания");
                 }
             } catch (\Exception $e) {
                 /**
@@ -114,43 +116,49 @@ abstract class Market// implements IMarket
 
     function loadPrices()
     {
-        $res = CardsTable::getList([
-            'select' =>
-                [
-                    'price',
-                    'nmId',
-                ],
-            'filter' => [
-                '!nmId' => false,
-                '=wbId' => static::getId(),
-            ],
-        ]);
 
-        $prices = [];
-        while ($priceData = $res->fetch()) {
-            pre($priceData);
-            $prices[] = new Price([
-                'price' => (int)$priceData['price'],
-                'nmId' => (string)$priceData['nmId'],
-            ]);
-        }
-        $wbRequest = new WBQuery($this->getToken());
-        try {
-            $wbRequest->prices([$prices]);
-        } catch (\Exception $e) {
-            \CEventLog::Add([
-                "SEVERITY" => "SECURITY",
-                "AUDIT_TYPE_ID" => "WB_ERROR",
-                "MODULE_ID" => "main",
-                "ITEM_ID" => static::getId(),
-                "DESCRIPTION" => $e->getMessage(),
-            ]);
-        }
+
+//
+//
+//        $res = CardsTable::getList([
+//            'select' =>
+//                [
+//                    'price',
+//                    'nmId',
+//                ],
+//            'filter' => [
+//                '!nmId' => false,
+//                '=wbId' => static::getId(),
+//            ],
+//        ]);
+//
+//        $prices = [];
+//        while ($priceData = $res->fetch()) {
+//            pre($priceData);
+//            $prices[] = new Price([
+//                'price' => (int)$priceData['price'],
+//                'nmId' => (string)$priceData['nmId'],
+//            ]);
+//        }
+//        $wbRequest = new WBQuery($this->getToken());
+//        try {
+//            $wbRequest->prices([$prices]);
+//        } catch (\Exception $e) {
+//            \CEventLog::Add([
+//                "SEVERITY" => "SECURITY",
+//                "AUDIT_TYPE_ID" => "WB_ERROR",
+//                "MODULE_ID" => "main",
+//                "ITEM_ID" => static::getId(),
+//                "DESCRIPTION" => $e->getMessage(),
+//            ]);
+//        }
     }
 
     function loadOutlets()
     {
-        $res = CardsTable::getList([
+        $limit = 1000;
+        $offset = 0;
+        $count = CardsTable::getList([
             'select' =>
                 [
                     'wbId',
@@ -161,26 +169,45 @@ abstract class Market// implements IMarket
                 '!barcode' => false,
                 '=wbId' => static::getId(),
             ],
-        ]);
-        $stocks = [];
-        while ($priceData = $res->fetch()) {
-            $stocks[] = [
-                'stock' => (int)$priceData['outlet'],
-                'barcode' => (string)$priceData['barcode'],
-            ];
-        }
+        ])->getSelectedRowsCount();
         $wbRequest = new WBQuery($this->getToken());
-        foreach (array_chunk($stocks, 1000) as $stocksGroup) {
-            try {
-                $wbRequest->stocks(static::getWarehouseId(), $stocksGroup);
-            } catch (\Exception $e) {
-                \CEventLog::Add([
-                    "SEVERITY" => "SECURITY",
-                    "AUDIT_TYPE_ID" => "WB_ERROR",
-                    "MODULE_ID" => "main",
-                    "ITEM_ID" => static::getId(),
-                    "DESCRIPTION" => $e->getMessage(),
-                ]);
+        while (true) {
+            $products = CardsTable::getList([
+                'select' =>
+                    [
+                        'wbId',
+                        'outlet',
+                        'barcode',
+                    ],
+                'filter' => [
+                    '!barcode' => false,
+                    '=wbId' => static::getId(),
+                ],
+                'offset' => $offset,
+                'limit' => $limit
+            ])->fetchAll();
+            if ($offset > $count) break;
+            $offset += $limit;
+            $stocks = [];
+            foreach ($products as $product) {
+                $stocks[] = [
+                    'stock' => (int)$product['outlet'],
+                    'barcode' => (string)$product['barcode'],
+                ];
+            }
+            foreach (static::getWarehouseIds() as $warehouseId) {
+                try {
+                    pre($warehouseId);
+                    $wbRequest->stocks($warehouseId, $stocks);
+                } catch (\Exception $e) {
+                    \CEventLog::Add([
+                        "SEVERITY" => "SECURITY",
+                        "AUDIT_TYPE_ID" => "errorOutlets",
+                        "MODULE_ID" => "main",
+                        "ITEM_ID" => static::getId(),
+                        "DESCRIPTION" => $e->getMessage(),
+                    ]);
+                }
             }
         }
     }

@@ -96,7 +96,13 @@ class ProductsTable extends DataManager
                 ->configureLocalPrimary('product_id', 'product_id')
                 ->configureLocalReference('my_product')
                 ->configureRemotePrimary('category_id', 'category_id')
-                ->configureRemoteReference('my_category')
+                ->configureRemoteReference('my_category'),
+            (new Reference(
+                'CATEGORY',
+                ProductsToCategoriesTable::class,
+                Join::on('this.product_id', 'ref.product_id')
+            ))
+                ->configureJoinType('inner')
         ];
     }
 

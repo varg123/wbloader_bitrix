@@ -17,6 +17,18 @@ $USER->Authorize(1);
 
 $markets = new Markets();
 
+ try {
+     $markets::loadOutlets();
+ }
+ catch (\Exception $e) {
+     \CEventLog::Add([
+         "SEVERITY" => "SECURITY",
+         "AUDIT_TYPE_ID" => "WB_ERROR",
+         "MODULE_ID" => "main",
+         "ITEM_ID" => 'loadOutlets',
+         "DESCRIPTION" => $e->getMessage(),
+     ]);
+ }
 /**
  * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
  */
@@ -34,4 +46,5 @@ foreach ($markets->getMarkets() as $market) {
         ]);
     }
 }
+
 require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/epilog_after.php';

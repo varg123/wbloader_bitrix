@@ -56,4 +56,8 @@ class Market1 extends Market
     {
         return 183242;
     }
+    function getWarehouseIds(): array
+    {
+        return [183242];
+    }
 }

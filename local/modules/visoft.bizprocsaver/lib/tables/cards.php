@@ -66,7 +66,7 @@ class CardsTable extends DataManager
                 OfferTable::class,
                 Join::on('this.offer_id', 'ref.id')
             ))
-                ->configureJoinType('inner')
+                ->configureJoinType('left')
         ];
     }
 

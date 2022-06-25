@@ -77,6 +77,16 @@ class OfferTable extends DataManager
             ]);
         }
     }
+    public static function saveOutlet($outlet)
+    {
+        $offerRowData = self::getById($outlet['product_id'])->fetch();
+        if ($offerRowData) {
+            $params = [
+                'outlet' => (int)$outlet['product_quantity'],
+            ];
+            self::update($outlet['product_id'], $params);
+        }
+    }
 
     /**
      * @param $offer Offer

@@ -5,6 +5,7 @@ namespace ViSoft\BizProcSaver\Service\Parser;
 use Bitrix\Main\Type\DateTime;
 use ViSoft\BizProcSaver\Service\Creater\Offer;
 use ViSoft\BizProcSaver\Service\Joomla\CategoriesTable;
+use ViSoft\BizProcSaver\Service\Joomla\ProductsToCategoriesTable;
 
 class JoomlaParser implements Offer\IGetOffer
 {
@@ -22,29 +23,20 @@ class JoomlaParser implements Offer\IGetOffer
             'select' => [
                 'product_id',
             ],
-            'filter' => [
-//                '>date_modify' => DateTime::createFromPhp(\DateTime::createFromFormat('d-m','20-06'))
-                '>product_quantity' => 0
-
-            ]
         ])->getSelectedRowsCount();
-//        pre($count);
-//        die();
-//        $count=24000;
-
         $vendors = array_column(\ViSoft\BizProcSaver\Service\Joomla\ManufacturersTable::getList([
             'select' => [
-                'name_ru-RU'
+                'manufacturer_id',
+                'name_ru-RU',
             ],
-            'filter' => [
-//                'manufacturer_id' => $product['product_manufacturer_id']
-            ]
-        ])->fetchAll(),null, 'manufacturer_id');
+        ])->fetchAll(), null, 'manufacturer_id');
 
 
         $categories = array_column(CategoriesTable::getList([
             'select' => [
-                'name_ru-RU'
+                'category_id',
+                'category_parent_id',
+                'name_ru-RU',
             ],
         ])->fetchAll(), null, 'category_id');
 
@@ -53,24 +45,31 @@ class JoomlaParser implements Offer\IGetOffer
             $products = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
                 'select' => [
                     '*',
-                    'category_id' => 'CATEGORIES.category_id',
-                    'CATEGORIES.*',
-                    'category_name' => 'CATEGORIES.name_ru-RU',
-                ],
-                'filter' => [
-                  '>product_quantity' => 0
                 ],
                 'limit' => $limit,
                 'offset' => $offset
             ])->fetchAll();
-            if($offset>$count) break;
+            if ($offset > $count) break;
             $offset += $limit;
             foreach ($products as $product) {
                 $offer = [];
                 $offer['id'] = (int)$product['product_id'];
                 $offer['price'] = (float)$product['product_price'];
-                $offer['category'] = $product['category_name'];
-//                $offer['model'] = $product['name_ru-RU'];
+                $categoriesIds = ProductsToCategoriesTable::getList([
+                    'select' => [
+                        'category_id'
+                    ],
+                    'filter' => [
+                        '=product_id' => (int)$product['product_id']
+                    ]
+                ])->fetchAll();
+                $lastCategory = array_pop($categoriesIds);
+                $lastCategoryId = (int)$lastCategory['category_id'];
+                if ($lastCategoryId) {
+                    $offer['category'] = $categories[$lastCategoryId]['name_ru-RU'];
+                } else {
+                    $offer['category'] = null;
+                }
 
                 $model = strip_tags((string)$product['name_ru-RU']);
                 $model = preg_replace('/[^а-яА-ЯёЁ0-9a-zA-Z @!?,.|\/:;\'"*&\@#$№%\[\]\{\}\(\)\+\-\$]+/u', '', $model);
@@ -109,8 +108,9 @@ class JoomlaParser implements Offer\IGetOffer
                 $offer['quantity'] = (int)$product['product_quantity'];
                 $offer['product_ean'] = (string)$product['product_ean'];
 
-                if ($product['category_parent_id']) {
-                    $offer['parentCategory'] = $categories[$product['category_parent_id']]['name_ru-RU'];
+                $lastParentCategoryId = (int)$categories[$lastCategoryId]['category_parent_id'];
+                if ($lastParentCategoryId) {
+                    $offer['parentCategory'] = $categories[$lastParentCategoryId]['name_ru-RU'];
                 }
 
                 $desc = strip_tags((string)$product['description_ru-RU']);

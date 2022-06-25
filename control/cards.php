@@ -16,22 +16,25 @@ global $USER;
 $USER->Authorize(1);
 
 $markets = new Markets();
+//
+// try {
+//     $markets::loadOffers();
+// }
+// catch (\Exception $e) {
+//     \CEventLog::Add([
+//         "SEVERITY" => "SECURITY",
+//         "AUDIT_TYPE_ID" => "WB_ERROR",
+//         "MODULE_ID" => "main",
+//         "ITEM_ID" => 'loadOffers',
+//         "DESCRIPTION" => $e->getMessage(),
+//     ]);
+// }
+//
+//die("end");
 
-try {
-    $markets::loadOffers();
-}
-catch (\Exception $e) {
-    \CEventLog::Add([
-        "SEVERITY" => "SECURITY",
-        "AUDIT_TYPE_ID" => "WB_ERROR",
-        "MODULE_ID" => "main",
-        "ITEM_ID" => 'loadOffers',
-        "DESCRIPTION" => $e->getMessage(),
-    ]);
-}
-
-
-
+/**
+ * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
+ */
 foreach ($markets->getMarkets() as $market) {
     try {
         $market->loadCard();
@@ -47,5 +50,5 @@ foreach ($markets->getMarkets() as $market) {
     }
 }
 
-\ViSoft\BizProcSaver\Service\Markets\Markets::resetUpdate();
+//\ViSoft\BizProcSaver\Service\Markets\Markets::resetUpdate();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/epilog_after.php';
