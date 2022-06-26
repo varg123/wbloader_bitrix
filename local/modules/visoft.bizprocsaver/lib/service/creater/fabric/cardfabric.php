@@ -231,6 +231,9 @@ class CardFabric
             case 'Совки' :
             case 'Малые грабли' :
             case 'Малые рыхлители' :
+
+            case 'Триммеры' :
+            case 'Леска для триммера' :
                 $product = new SimpleProduct($offer);
                 break;
             case 'Резинки' :
