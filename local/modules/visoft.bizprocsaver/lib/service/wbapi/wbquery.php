@@ -35,17 +35,24 @@ class WBQuery
                 "price" => (int)$item->price
             ];
         }
+        $param = json_encode($param, JSON_UNESCAPED_UNICODE);
         if ($param) {
             $res = $this->curl->post('https://suppliers-api.wildberries.ru/public/api/v1/prices', $param);
             $responce = json_decode($res, true);
             if ($this->curl->http_status_code == '200') {
-                return true;
+                if ($responce['data']['errors']) {
+                    throw new \Exception(serialize($responce['data']['errors']));
+                }
             }
-            else {
-                throw new \Exception(serialize($responce));
+            else{
+                if ($responce['errors']) {
+                    throw new \Exception(serialize($responce['errors']));
+                }
             }
+            return true;
         }
         return true;
+
     }
 
     public function info($quantity = 0)

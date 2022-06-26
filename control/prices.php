@@ -16,7 +16,21 @@ global $USER;
 $USER->Authorize(1);
 
 $markets = new Markets();
-
+try {
+    $markets::loadPrices();
+}
+catch (\Exception $e) {
+    \CEventLog::Add([
+        "SEVERITY" => "SECURITY",
+        "AUDIT_TYPE_ID" => "WB_ERROR",
+        "MODULE_ID" => "main",
+        "ITEM_ID" => 'loadPrices',
+        "DESCRIPTION" => $e->getMessage(),
+    ]);
+}
+/**
+ * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
+ */
 foreach ($markets->getMarkets() as $market) {
     try {
         $market->loadPrices();

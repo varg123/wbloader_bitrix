@@ -32,11 +32,8 @@ class Markets
         $count = ProductsTable::getList([
             'select' => [
                 'product_id',
-//                'product_quantity',
             ],
-//            'limit' => 100
         ])->getSelectedRowsCount();
-//        $count=5;
         while (true) {
             $products = ProductsTable::getList([
                 'select' => [
@@ -50,6 +47,32 @@ class Markets
             $offset += $limit;
             foreach($products as $product) {
                 OfferTable::saveOutlet($product);
+            }
+        }
+    }
+    public static function loadPrices()
+    {
+        $offset=0;
+        $limit=10000;
+        $count = ProductsTable::getList([
+            'select' => [
+                'product_id',
+            ],
+        ])->getSelectedRowsCount();
+//        $count=5000;
+        while (true) {
+            $products = ProductsTable::getList([
+                'select' => [
+                    'product_id',
+                    'product_price',
+                ],
+                'limit' => $limit,
+                'offset' => $offset
+            ])->fetchAll();
+            if ($offset >= $count) break;
+            $offset += $limit;
+            foreach($products as $product) {
+                OfferTable::savePrice($product);
             }
         }
     }

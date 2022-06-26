@@ -33,6 +33,32 @@ class CreateCardsForLoad implements IEvent
      */
     public static function updateCards($p1, $p2, $fields)
     {
+
+        if ($fields['price']) {
+            $markets = new Markets();
+            foreach ($markets->getMarkets() as $market) {
+                $marketId = $market->getId();
+                $cardRow = CardsTable::getList([
+                    'select' => [
+                        '*'
+                    ],
+                    'filter' => [
+                        '=wbId' => $marketId,
+                        '=offer_id' => $p2['id'],
+                    ]
+                ])->fetch();
+                if ($cardRow) {
+                    $offer = unserialize($cardRow['data']);
+                    $offer->price = $fields['price'];
+                    $tmpOffer = $market->changeOffer($offer);
+                    CardsTable::update($cardRow['id'],[
+                        'price' => $tmpOffer->price,
+                        'data' => serialize($tmpOffer),
+                    ]);
+                }
+            }
+            return;
+        }
         if ($fields['outlet']) {
             $markets = new Markets();
             /**
@@ -55,6 +81,7 @@ class CreateCardsForLoad implements IEvent
                     ]);
                 }
             }
+            return;
         }
 
         if ($fields['data']) {
@@ -95,6 +122,7 @@ class CreateCardsForLoad implements IEvent
                     ]);
                 }
             }
+            return;
         }
 
     }

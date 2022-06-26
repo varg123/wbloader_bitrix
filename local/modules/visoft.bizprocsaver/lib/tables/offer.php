@@ -87,6 +87,19 @@ class OfferTable extends DataManager
             self::update($outlet['product_id'], $params);
         }
     }
+    public static function savePrice($price)
+    {
+        $offerRowData = self::getById($price['product_id'])->fetch();
+        if ($offerRowData) {
+            $offer = unserialize($offerRowData['data']);
+            $offer->price = (float)$price['product_price'];
+            $params = [
+                'price' => (float)$price['product_price'],
+                'data' => serialize($offer),
+            ];
+            self::update($price['product_id'], $params);
+        }
+    }
 
     /**
      * @param $offer Offer

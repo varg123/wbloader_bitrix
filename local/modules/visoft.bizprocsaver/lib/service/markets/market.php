@@ -116,42 +116,57 @@ abstract class Market// implements IMarket
 
     function loadPrices()
     {
+        $limit = 1000;
+        $offset = 0;
+        $count = CardsTable::getList([
+            'select' =>
+                [
+                    'nmId',
+                    'price',
+                ],
+            'filter' => [
+                '!nmId' => false,
+                '=wbId' => static::getId(),
+            ],
+        ])->getSelectedRowsCount();
+        $wbRequest = new WBQuery($this->getToken());
+        while (true) {
+            $products = CardsTable::getList([
+                'select' =>
+                    [
+                        'nmId',
+                        'price',
+                    ],
+                'filter' => [
+                    '!nmId' => false,
+                    '=wbId' => static::getId(),
+                ],
+                'offset' => $offset,
+                'limit' => $limit
+            ])->fetchAll();
+            if ($offset > $count) break;
+            $offset += $limit;
 
+            $prices=[];
+            foreach ($products as $price) {
+                $prices[] = new Price([
+                    'price' => (int)$price['price'],
+                    'nmId' => (string)$price['nmId'],
+                ]);
+            }
+            try {
+                $wbRequest->prices($prices);
+            } catch (\Exception $e) {
+                \CEventLog::Add([
+                    "SEVERITY" => "SECURITY",
+                    "AUDIT_TYPE_ID" => "WB_ERROR",
+                    "MODULE_ID" => "main",
+                    "ITEM_ID" => static::getId(),
+                    "DESCRIPTION" => $e->getMessage(),
+                ]);
+            }
+        }
 
-//
-//
-//        $res = CardsTable::getList([
-//            'select' =>
-//                [
-//                    'price',
-//                    'nmId',
-//                ],
-//            'filter' => [
-//                '!nmId' => false,
-//                '=wbId' => static::getId(),
-//            ],
-//        ]);
-//
-//        $prices = [];
-//        while ($priceData = $res->fetch()) {
-//            pre($priceData);
-//            $prices[] = new Price([
-//                'price' => (int)$priceData['price'],
-//                'nmId' => (string)$priceData['nmId'],
-//            ]);
-//        }
-//        $wbRequest = new WBQuery($this->getToken());
-//        try {
-//            $wbRequest->prices([$prices]);
-//        } catch (\Exception $e) {
-//            \CEventLog::Add([
-//                "SEVERITY" => "SECURITY",
-//                "AUDIT_TYPE_ID" => "WB_ERROR",
-//                "MODULE_ID" => "main",
-//                "ITEM_ID" => static::getId(),
-//                "DESCRIPTION" => $e->getMessage(),
-//            ]);
-//        }
     }
 
     function loadOutlets()
@@ -197,7 +212,6 @@ abstract class Market// implements IMarket
             }
             foreach (static::getWarehouseIds() as $warehouseId) {
                 try {
-                    pre($warehouseId);
                     $wbRequest->stocks($warehouseId, $stocks);
                 } catch (\Exception $e) {
                     \CEventLog::Add([
