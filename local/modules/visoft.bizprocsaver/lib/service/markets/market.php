@@ -17,7 +17,7 @@ use ViSoft\BizProcSaver\Tables\CardsTable;
 abstract class Market// implements IMarket
 {
 
-    abstract function getWarehouseIds(): array ;
+    abstract function getWarehouseIds(): array;
 
     abstract function getId(): string;
 
@@ -113,6 +113,70 @@ abstract class Market// implements IMarket
         }
     }
 
+    function writeNmId()
+    {
+        $wbId = $this->getId();
+        $wbRequest = new WBQuery($this->getToken());
+        $limit = 100;
+        $offset = 0;
+        $count = CardsTable::getList([
+            'select' => [
+                'id',
+            ],
+            'filter' => [
+                '=nmId' => 0,
+                '!vendorCode' => false,
+                '=wbId' => $wbId,
+                'error' => false,
+            ],
+        ])->getSelectedRowsCount();
+        while (true) {
+            $cardsRows = CardsTable::getList([
+                'select' =>
+                    [
+                        'id',
+                        'vendorCode',
+                    ],
+                'filter' => [
+                    '=nmId' => 0,
+                    '!vendorCode' => false,
+                    '=wbId' => $wbId,
+                    'error' => false,
+                ],
+                'offset' => $offset,
+                'limit' => $limit
+            ])->fetchAll();
+            if ($offset > $count) break;
+            $offset += $limit;
+            foreach ($cardsRows as $cardRow) {
+                try {
+                    $card=null;
+                    $cardRes = $this->findCardByVendorCode($wbRequest, $cardRow['vendorCode']);
+                    if ($cardRes) $card = $cardRes;
+                    if ($card) {
+                        $nmId = current($card->nomenclatures)->nmId;
+                        CardsTable::update($cardRow['id'],[
+                            'nmId' => $nmId
+                        ]);
+                    }
+                    else {
+                        CardsTable::update($cardRow['id'], [
+                            'error' => 'Не найдена после загрузки'
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \CEventLog::Add([
+                        "SEVERITY" => "SECURITY",
+                        "AUDIT_TYPE_ID" => "WB_ERROR",
+                        "MODULE_ID" => "main",
+                        "ITEM_ID" => static::getId(),
+                        "DESCRIPTION" => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+    }
+
 
     function loadPrices()
     {
@@ -147,7 +211,7 @@ abstract class Market// implements IMarket
             if ($offset > $count) break;
             $offset += $limit;
 
-            $prices=[];
+            $prices = [];
             foreach ($products as $price) {
                 $prices[] = new Price([
                     'price' => (int)$price['price'],

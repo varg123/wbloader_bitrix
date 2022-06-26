@@ -13,7 +13,7 @@ class Markets
     {
         return [
             new \ViSoft\BizProcSaver\Service\Markets\Market1(),//ООО Маркетплейс
-//            new \ViSoft\BizProcSaver\Service\Markets\Market2(),//Качусов
+            new \ViSoft\BizProcSaver\Service\Markets\Market2(),//Качусов
         ];
     }
 

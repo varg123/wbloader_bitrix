@@ -16,13 +16,15 @@ class JoomlaParser implements Offer\IGetOffer
 
     public function getOffer()
     {
-
-        $limit = 500;
+        $limit = 1000;
         $offset = 0;
         $count = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
             'select' => [
                 'product_id',
             ],
+            'filter' => [
+                '>product_quantity' => 0
+            ]
         ])->getSelectedRowsCount();
         $vendors = array_column(\ViSoft\BizProcSaver\Service\Joomla\ManufacturersTable::getList([
             'select' => [
@@ -45,6 +47,9 @@ class JoomlaParser implements Offer\IGetOffer
             $products = \ViSoft\BizProcSaver\Service\Joomla\ProductsTable::getList([
                 'select' => [
                     '*',
+                ],
+                'filter' => [
+                    '>product_quantity' => 0
                 ],
                 'limit' => $limit,
                 'offset' => $offset

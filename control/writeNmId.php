@@ -1,6 +1,7 @@
 <?php
 
 use ViSoft\BizProcSaver\Service\Markets\Markets;
+use ViSoft\BizProcSaver\Service\WBApi\WBQuery;
 
 define('NO_KEEP_STATISTIC', true);
 define('NOT_CHECK_PERMISSIONS', true);
@@ -17,24 +18,12 @@ $USER->Authorize(1);
 
 $markets = new Markets();
 
-// try {
-//     $markets::loadOutlets();
-// }
-// catch (\Exception $e) {
-//     \CEventLog::Add([
-//         "SEVERITY" => "SECURITY",
-//         "AUDIT_TYPE_ID" => "WB_ERROR",
-//         "MODULE_ID" => "main",
-//         "ITEM_ID" => 'loadOutlets',
-//         "DESCRIPTION" => $e->getMessage(),
-//     ]);
-// }
 /**
  * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
  */
 foreach ($markets->getMarkets() as $market) {
     try {
-        $market->loadOutlets();
+        $market->writeNmId();
     }
     catch (\Exception $e) {
         \CEventLog::Add([
@@ -47,4 +36,5 @@ foreach ($markets->getMarkets() as $market) {
     }
 }
 
+\ViSoft\BizProcSaver\Service\Markets\Markets::resetUpdate();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/epilog_after.php';

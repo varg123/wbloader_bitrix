@@ -34,7 +34,7 @@ class CreateCardsForLoad implements IEvent
     public static function updateCards($p1, $p2, $fields)
     {
 
-        if ($fields['price']) {
+        if ($fields['price'] and empty($fields['data'])) {
             $markets = new Markets();
             foreach ($markets->getMarkets() as $market) {
                 $marketId = $market->getId();
@@ -59,7 +59,7 @@ class CreateCardsForLoad implements IEvent
             }
             return;
         }
-        if ($fields['outlet']) {
+        if ($fields['outlet'] and empty($fields['data'])) {
             $markets = new Markets();
             /**
              * @var $market IMarket

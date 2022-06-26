@@ -33,20 +33,20 @@ $markets = new Markets();
 /**
  * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
  */
-//foreach ($markets->getMarkets() as $market) {
-//    try {
-//        $market->loadCard();
-//    }
-//    catch (\Exception $e) {
-//        \CEventLog::Add([
-//            "SEVERITY" => "SECURITY",
-//            "AUDIT_TYPE_ID" => "WB_ERROR",
-//            "MODULE_ID" => "main",
-//            "ITEM_ID" => $market->getId(),
-//            "DESCRIPTION" => $e->getMessage(),
-//        ]);
-//    }
-//}
+foreach ($markets->getMarkets() as $market) {
+    try {
+        $market->loadCard();
+    }
+    catch (\Exception $e) {
+        \CEventLog::Add([
+            "SEVERITY" => "SECURITY",
+            "AUDIT_TYPE_ID" => "WB_ERROR",
+            "MODULE_ID" => "main",
+            "ITEM_ID" => $market->getId(),
+            "DESCRIPTION" => $e->getMessage(),
+        ]);
+    }
+}
 
-//\ViSoft\BizProcSaver\Service\Markets\Markets::resetUpdate();
+\ViSoft\BizProcSaver\Service\Markets\Markets::resetUpdate();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/epilog_after.php';
