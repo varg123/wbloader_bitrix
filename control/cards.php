@@ -30,9 +30,7 @@ $markets = new Markets();
      ]);
  }
 
-/**
  * @var $market \ViSoft\BizProcSaver\Service\Markets\Market
- */
 foreach ($markets->getMarkets() as $market) {
     try {
         $market->loadCard();
